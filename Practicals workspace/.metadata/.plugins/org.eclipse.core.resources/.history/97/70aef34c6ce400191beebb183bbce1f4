@@ -1,0 +1,16 @@
+import java.util.Hashtable;
+
+import jade.core.Agent;
+
+public class Bidder extends Agent {
+	Hashtable toBuyList;
+	
+	protected void setup() {
+
+	}
+
+	protected void takeDown() {
+
+	}
+
+}

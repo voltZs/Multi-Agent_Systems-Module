@@ -1,0 +1,20 @@
+import java.util.Hashtable;
+
+import jade.core.Agent;
+
+public class Auctioneer extends Agent {
+	Hashtable catalogue;
+
+	protected void setup() {
+
+		// Create the catalogue
+		catalogue = new Hashtable();
+		System.out.println(getAID().getName() + " is live.");
+
+	}
+
+	protected void takeDown() {
+
+	}
+
+}

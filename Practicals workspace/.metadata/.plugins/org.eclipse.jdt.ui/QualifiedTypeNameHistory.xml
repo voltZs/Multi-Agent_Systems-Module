@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="jade.AppletBoot"/>
+<fullyQualifiedTypeName name="java.lang.Runtime"/>
+<fullyQualifiedTypeName name="jade.core.ProfileImpl"/>
+<fullyQualifiedTypeName name="jade.core.Profile"/>
+<fullyQualifiedTypeName name="jade.wrapper.ContainerController"/>
+<fullyQualifiedTypeName name="jade.wrapper.AgentController"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.TickerBehaviour"/>
+<fullyQualifiedTypeName name="jade.lang.acl.MessageTemplate"/>
+<fullyQualifiedTypeName name="jade.lang.acl.ACLMessage"/>
+<fullyQualifiedTypeName name="jade.domain.FIPAAgentManagement.ServiceDescription"/>
+<fullyQualifiedTypeName name="jade.domain.FIPAAgentManagement.DFAgentDescription"/>
+<fullyQualifiedTypeName name="jade.domain.FIPAException"/>
+<fullyQualifiedTypeName name="jade.domain.DFService"/>
+<fullyQualifiedTypeName name="jade.core.Agent"/>
+<fullyQualifiedTypeName name="java.util.Hashtable"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.Behaviour"/>
+<fullyQualifiedTypeName name="jade.core.AID"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.OneShotBehaviour"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.WakerBehaviour"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.SimpleBehaviour"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.CyclicBehaviour"/>
+</qualifiedTypeNameHistroy>

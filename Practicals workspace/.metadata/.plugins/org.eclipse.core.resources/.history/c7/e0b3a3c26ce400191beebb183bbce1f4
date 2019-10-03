@@ -1,0 +1,26 @@
+import java.util.Hashtable;
+import java.util.Set;
+
+import jade.core.Agent;
+
+public class Bidder extends Agent {
+	Hashtable toBuyList;
+	
+	protected void setup() {
+		
+		Object[] args = getArguments();
+		// Create the catalogue
+		toBuyList = (Hashtable) args[0];
+
+		System.out.println(getAID().getName() + " is live.");
+		Set<String> keys = toBuyList.keySet();
+		for(String key : keys) {
+			System.out.println("I want to buy: " + key + " for: " + toBuyList.get(key));
+		}
+	}
+
+	protected void takeDown() {
+
+	}
+
+}

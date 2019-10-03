@@ -1,0 +1,67 @@
+import java.util.Hashtable;
+import java.util.Set;
+
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.WakerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+
+public class Bidder extends Agent {
+	Hashtable toBuyList;
+	
+	protected void setup() {
+		
+		Object[] args = getArguments();
+		// Create the catalogue
+		toBuyList = (Hashtable) args[0];
+		
+	
+		//find auctioneer and register to him
+		addBehaviour(new WakerBehaviour(this, 10000) {
+			public void handleElapsedTimeout() {
+				AID auctioneer = null;
+				DFAgentDescription template = new DFAgentDescription();
+				ServiceDescription sd = new ServiceDescription();
+				sd.setType("auction-running");
+				template.addServices(sd);
+				try {
+					DFAgentDescription[] result = DFService.search(myAgent, template);
+					AID[] auctioneers = new AID[result.length];
+					if (auctioneers.length != 0) {
+						auctioneer = auctioneers[0];
+					}
+				} catch (FIPAException fe) {
+					fe.printStackTrace();
+				}
+				
+				// send message to auctioneer to register to him
+				if (auctioneer != null) {
+					ACLMessage reg = new ACLMessage(ACLMessage.INFORM);
+					reg.addReceiver(auctioneer);
+					reg.setContent(getAID().getName());
+					reg.setConversationId("bidder-registration");
+//					reg.setReplyWith("reg"+System.currentTimeMillis()); //unique value
+					myAgent.send(reg);
+				} else {
+					System.out.println(getAID().getName() + " No auctioneer found");
+				}
+			}
+		});
+
+		System.out.println(getAID().getName() + " is live.");
+		Set<String> keys = toBuyList.keySet();
+		for(String key : keys) {
+			System.out.println(getAID().getName() + "I want to buy: " + key + " for: " + toBuyList.get(key));
+		}
+	}
+
+	protected void takeDown() {
+
+	}
+
+}

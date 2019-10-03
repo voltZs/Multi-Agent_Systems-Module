@@ -1,0 +1,62 @@
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Set;
+
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.TickerBehaviour;
+import jade.core.behaviours.WakerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+
+public class Auctioneer extends Agent {
+	Hashtable catalogue;
+	Behaviour auction;
+	AID[] bidders;
+
+	protected void setup() {
+		
+		//Register the agent to DF (Yellow pages) service 
+		DFAgentDescription dfd = new DFAgentDescription();
+		dfd.setName(getAID());
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("auction-running");
+		sd.setName("JADE-auction-running");
+		dfd.addServices(sd);
+		try {
+			DFService.register(this, dfd);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+		
+		Object[] args = getArguments();
+		// Create the catalogue
+		catalogue = (Hashtable) args[0];
+		
+		System.out.println(getAID().getName() + " is live.");
+		Set<String> keys = catalogue.keySet();
+		for(String key : keys) {
+			System.out.println("I sell: " + key + " with ID: " + catalogue.get(key));
+		}
+		
+		auction = new WakerBehaviour(this, 3000) {
+			protected void handleElapsedTimeout() {
+				System.out.println(getAID().getName() + " starting auction now!");
+				
+				//...
+				
+				System.out.println(getAID().getName() + " auction ended!");
+			}
+		};
+		addBehaviour(auction);
+
+	}
+
+	protected void takeDown() {
+
+	}
+
+}

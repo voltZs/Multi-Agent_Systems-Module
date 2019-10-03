@@ -1,0 +1,101 @@
+import jade.core.behaviours.*;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.core.Agent;
+import java.util.*;
+
+public class BookSellerAgent extends Agent {
+	// The catalogue of books for sale (maps the title of a book to its price)
+	private Hashtable catalogue;
+	// The GUI by means of which the user can add books in the catalogue
+	private BookSellerGui myGui;
+
+	protected void setup() {
+		// Create the catalogue
+		catalogue = new Hashtable();
+
+		// Create and show GUI
+		myGui = new BookSellerGui(this);
+		myGui.showGui();
+
+		// Add the behaviour serving requests for offer from buyer agents
+		addBehaviour(new OfferRequestsServer());
+
+		// Add the behaviour serving purchase orders from buyer agents
+		addBehaviour(new PurchaseOrdersServer());
+	}
+	 
+	protected void takeDown() {
+		myGui.dispose();
+		System.out.println("Seller-agent " + getAID().getName() + " terminating.");
+	}
+	 
+	 /**
+	 This is invoked by the GUI when the user adds a new book for sale
+	 */
+	public void updateCatalogue(final String title, final int price) {
+		addBehaviour(new OneShotBehaviour() {
+			public void action() {
+				catalogue.put(title, new Integer(price));
+			}
+		});
+	}
+
+	
+	private class OfferRequestsServer extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+			ACLMessage msg = myAgent.receive(mt); //pass in the message template to make sure we ignore messages that are not calls for proposal
+			System.out.println("Agent: " + getAID().getName() + " - checking for proposals.");
+			if (msg != null) {
+				// Received a message, process it 
+				System.out.println("Agent: " + getAID().getName() + " - received message");
+				String title = msg.getContent();
+				ACLMessage reply = msg.createReply();
+				
+				Integer price = (Integer) catalogue.get(title);
+				if(price != null) {
+					System.out.println("Agent: " + getAID().getName() + " - I have " + title + "!");
+					//we have this book in the catalogue - create proposal
+					reply.setPerformative(ACLMessage.PROPOSE);
+					reply.setContent(String.valueOf(price.intValue()));
+				} else {
+					System.out.println("Agent: " + getAID().getName() + " - I don't have " + title + "!");
+					//This book is not in the catalogue
+					reply.setPerformative(ACLMessage.REFUSE);
+					reply.setContent("not-available");
+				}
+			} else {
+				System.out.println("Agent: " + getAID().getName() + " - no proposals, blocking");
+				block();
+			}
+		}
+	} // End of inner class OfferRequestsServer
+	
+	
+	
+	private class PurchaseOrdersServer extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				// ACCEPT_PROPOSAL Message received. Process it
+				String title = msg.getContent();
+				ACLMessage reply = msg.createReply();
+				Integer price = (Integer) catalogue.remove(title);
+				if (price != null) {
+					reply.setPerformative(ACLMessage.INFORM);
+					System.out.println(title + " sold to agent " + msg.getSender().getName());
+				} else {
+					// The requested book has been sold to another buyer in the meanwhile .
+					reply.setPerformative(ACLMessage.FAILURE);
+					reply.setContent("not-available");
+				}
+				myAgent.send(reply);
+			} else {
+				block();
+			}
+		}
+	} // End of inner class PurchaseOrdersServer
+
+}

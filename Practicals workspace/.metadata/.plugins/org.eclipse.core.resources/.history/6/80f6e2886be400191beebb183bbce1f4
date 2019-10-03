@@ -1,0 +1,29 @@
+import java.util.Hashtable;
+import java.util.Set;
+
+import jade.core.Agent;
+
+public class Auctioneer extends Agent {
+	Hashtable catalogue;
+
+	protected void setup() {
+		
+		Object[] args = getArguments();
+		// Create the catalogue
+		catalogue = (Hashtable) args[0];
+		
+		System.out.println(getAID().getName() + " is live.");
+		Set<String> keys = catalogue.keySet();
+		for(String key : keys) {
+			System.out.println("I sell: " + key + " with ID: " + catalogue.get(key));
+		}
+		
+		
+
+	}
+
+	protected void takeDown() {
+
+	}
+
+}
