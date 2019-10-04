@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Set;
@@ -17,11 +16,10 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-
 public class Auctioneer extends Agent {
 	Hashtable catalogue;
 	Behaviour auction;
-	private ArrayList<AID> bidders;
+	AID[] bidders;
 
 	protected void setup() {
 		
@@ -41,8 +39,6 @@ public class Auctioneer extends Agent {
 		Object[] args = getArguments();
 		// Create the catalogue
 		catalogue = (Hashtable) args[0];
-		
-		bidders = new ArrayList<AID>();
 		
 		System.out.println(getAID().getName() + " is live.");
 		Set<String> keys = catalogue.keySet();
@@ -77,10 +73,6 @@ public class Auctioneer extends Agent {
 				// give time for bidder registration
 				if(elapsed > 10000) {
 					//time out, end of registration, start auction
-					System.out.println("Bidders registered: ");
-					for (AID bidder : bidders){
-						System.out.println(bidder.getName());
-					}
 					myAgent.addBehaviour(auction);
 					timeOut = true;
 				} else {
@@ -94,10 +86,12 @@ public class Auctioneer extends Agent {
 						String bidderAID = msg.getContent();
 						AID bidder = msg.getSender();
 						//bidders pass in their aid as msg content if they want to register for auction
-						if(bidder.getName().equals(msg.getContent())) {
-							bidders.add(bidder);
+						System.out.println("Agent: " + bidder.getName() + "message content: " + msg.getContent());
+						System.out.println("Agent: " + bidder.getName() + "getname method : " + bidder.getName());
+						if(bidder.getName() == msg.getContent()) {
+							System.out.println("Agent: " + bidder.getName() + " - Registering for auction");
 						} else {
-							System.out.println("Agent: " + bidder.getName() + " sent inform message to auctioneer that is not their name");
+							System.out.println("Agent: " + bidder.getName() + " sent inform message that is not their name");
 						}
 					} else {
 						block();

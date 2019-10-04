@@ -21,4 +21,6 @@
 <fullyQualifiedTypeName name="jade.core.behaviours.WakerBehaviour"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.SimpleBehaviour"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.CyclicBehaviour"/>
+<fullyQualifiedTypeName name="jade.util.leap.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
 </qualifiedTypeNameHistroy>
