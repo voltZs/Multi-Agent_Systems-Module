@@ -15,12 +15,17 @@ import jade.lang.acl.MessageTemplate;
 
 public class Bidder extends Agent {
 	Hashtable toBuyList;
-	
+	// The GUI by means of which the user can add books in the catalogue
+	private BidderGui myGui;
+			
 	protected void setup() {
 		
 		Object[] args = getArguments();
 		// Create the catalogue
 		toBuyList = (Hashtable) args[0];
+		// Create and show GUI
+		myGui = new BidderGui(this);
+		myGui.showGui();
 		
 	
 		//find auctioneer and register to him
@@ -75,7 +80,7 @@ public class Bidder extends Agent {
 			if (msg != null) {
 				
 				String auctionItem = msg.getContent();
-				System.out.println("Auctioning item:  "+ auctionItem);
+				System.out.println(getAID().getName() + " received auction offer for "+ auctionItem);
 				ACLMessage reply = msg.createReply();
 				Integer offerAmount = (Integer) toBuyList.get(auctionItem);
 				if(offerAmount != null) {
@@ -93,5 +98,17 @@ public class Bidder extends Agent {
 			}
 		}
 	}
+	
+	/**
+	 This is invoked by the GUI when the user adds a new book for sale
+	 */
+	public void updateToBuyList(final String item, final int price) {
+		addBehaviour(new OneShotBehaviour() {
+			public void action() {
+				toBuyList.put(item, new Integer(price));
+			}
+		});
+	}
+
 
 }

@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -21,6 +22,9 @@ import jade.lang.acl.MessageTemplate;
 public class Auctioneer extends Agent {
 	private Hashtable catalogue;
 	private ArrayList<AID> bidders;
+	private boolean auctionStarted = false;
+	// The GUI by means of which the user can add books in the catalogue
+	private AuctioneerGui myGui;
 
 	protected void setup() {
 		
@@ -37,16 +41,20 @@ public class Auctioneer extends Agent {
 			fe.printStackTrace();
 		}
 		
-		Object[] args = getArguments();
-		// Create the catalogue
-		catalogue = (Hashtable) args[0];
-		
 		bidders = new ArrayList<AID>();
-		
+		// Create and show GUI
+		myGui = new AuctioneerGui(this);
+		myGui.showGui();
+
 		System.out.println(getAID().getName() + " is live.");
-		Set<String> keys = catalogue.keySet();
-		for(String key : keys) {
-			System.out.println(getAID().getName() + " I sell: " + key + " with ID: " + catalogue.get(key));
+
+		File csvPath = new File("auctioneerItemsTask1.csv");
+		ArrayList<String[]> csv = CSVReader.readCSV(csvPath.getAbsolutePath());
+		System.out.println(csvPath.getAbsolutePath());
+		catalogue = new Hashtable();
+		for(String[] line : csv) {
+//			System.out.println(line[0] + " - " + line[1]);
+			catalogue.put(line[0], line[1]);
 		}
 		
 		long t0 = System.currentTimeMillis();
@@ -56,7 +64,7 @@ public class Auctioneer extends Agent {
 			public void action() {
 				elapsed = System.currentTimeMillis()-t0;
 				// give time for bidder registration
-				if(elapsed > 10000) {
+				if(auctionStarted) {
 					//time out, end of registration, start auction
 					System.out.println("Bidders registered: ");
 					for (AID bidder : bidders){
@@ -82,7 +90,7 @@ public class Auctioneer extends Agent {
 							System.out.println("Agent: " + bidder.getName() + " sent inform message to auctioneer that is not their name");
 						}
 					}
-//					Not adding a block() here otherwise the agent doesn't execute the first part of the if statement after a minute 
+//					Not adding a block() here otherwise the agent doesn't execute the first part of the if statement
 //					(unless it receives a registration call at that time)
 				}
 			}
@@ -98,10 +106,14 @@ public class Auctioneer extends Agent {
 
 	}
 	
+	public void startAuction(){
+		auctionStarted = true;
+	}
+	
 	private class AuctionProcess extends SimpleBehaviour {
 		
 		private AID highestBidder;
-		private int hightesPrice;
+		private int highestPrice;
 		private int repliesCnt;
 		private MessageTemplate mt;
 		boolean auctionComplete = false;
@@ -114,7 +126,7 @@ public class Auctioneer extends Agent {
 			for(String itemDescription : keys) {
 				//reset all attributes for auctioning
 				highestBidder = null;
-				hightesPrice = 0;
+				highestPrice = 0;
 				repliesCnt = 0; //total of received replies
 				mt = null; //template to receive replies
 				
@@ -133,14 +145,40 @@ public class Auctioneer extends Agent {
 						MessageTemplate.MatchInReplyTo(cfp.getReplyWith())
 						);
 				
-				
-				// while # of replies < # bidders - making sure we get a reply from everyone
-//				while(){
-//					
-//				}
+// 				while # of replies < # bidders - making sure we get a reply from everyone
+				while(repliesCnt < bidders.size()){
 					//listen to replies with PROPOSE/REFUSE
-					//with each reply replace the highest bidder if bid is higher
+					ACLMessage reply = myAgent.receive(mt);
+					if (reply != null) {
+						System.out.println("Received reply from " + reply.getSender().getName());
+						if(reply.getPerformative() == ACLMessage.PROPOSE){
+							int bidderPrice = Integer.parseInt(reply.getContent());
+							System.out.println("\t offering: " + bidderPrice);
+							//with each reply replace the highest bidder if bid is higher
+							if(bidderPrice > highestPrice) {
+								highestPrice = bidderPrice;
+								highestBidder = reply.getSender();
+							} 
+						} else {
+							System.out.println("\t no offer");
+						}
+						repliesCnt++;
+					} 
+				}
+				System.out.println("-----");
+				
 				//send message to highest bidder ACCEPT_PROPOSAL
+				if(highestPrice != 0){
+					ACLMessage acc = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+					acc.addReceiver(highestBidder);
+					acc.setContent(String.valueOf(catalogue.get(itemDescription)));
+					acc.setConversationId("auctioned-item-"+itemDescription);
+					acc.setReplyWith("acc"+System.currentTimeMillis());
+					myAgent.send(acc);
+					System.out.println(itemDescription + " sold to " + highestBidder.getName());
+				} else {
+					System.out.println(itemDescription + " not sold");
+				}
 			}
 					
 			System.out.println("--------------------------------- \n" + getAID().getName() + " auction ended! ");
