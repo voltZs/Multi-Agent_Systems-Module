@@ -1,0 +1,26 @@
+
+public class BidTuple {
+	private String left;
+	private int right;
+	
+	public BidTuple(String left, int right){
+		this.left = left;
+		this.right = right;
+	}
+	
+	public void setKey(String left){
+		this.left = left;
+	}
+	
+	public void setValue(int right){
+		this.right = right;
+	}
+	
+	public String getKey(){
+		return this.left;
+	}
+	
+	public int getValue(){
+		return this.right;
+	}
+}
