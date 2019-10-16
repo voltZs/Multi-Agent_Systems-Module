@@ -1,0 +1,49 @@
+package mas.coursework;
+
+import java.util.HashMap;
+
+public class CustomerOrder {
+	
+	private int screen;
+	private int battery;
+	private int ram;
+	private int storage;
+	private int quantity;
+	
+	public CustomerOrder(){
+		this.randomize();
+	}
+
+	public void randomize() {
+		if(Math.random() < 0.5){
+			//small smartphone 
+			screen = 5;
+			battery = 2000;
+		} else {
+			//phablet
+			screen = 7;
+			battery = 3000;
+		}
+		
+		if(Math.random() < 0.5){
+			ram = 4;
+		} else {
+			ram = 8;
+		}
+		
+		if(Math.random() < 0.5){
+			storage = 64;
+		} else {
+			storage = 256;
+		}
+		
+		quantity = (int) Math.floor(1 + 50 * Math.random());
+	}
+	
+	public String orderDetails(){
+		String details = quantity + "," + screen + "," + battery + "," + ram + "," + storage;
+		
+		return details;
+	}
+	
+}

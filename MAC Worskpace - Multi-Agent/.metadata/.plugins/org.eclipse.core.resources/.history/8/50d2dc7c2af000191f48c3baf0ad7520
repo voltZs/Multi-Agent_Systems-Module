@@ -1,0 +1,14 @@
+package mas.coursework;
+
+public class OrderGenerator {
+	
+	private int screen;
+	private int battery;
+	private int ram;
+	private int storage;
+	
+	public OrderGenerator(){
+		
+	}
+
+}

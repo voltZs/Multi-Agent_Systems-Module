@@ -1,0 +1,9 @@
+package mas.coursework;
+
+public class SupplyChainSimulation {
+
+	public static void main(String[] args) {
+
+	}
+
+}
