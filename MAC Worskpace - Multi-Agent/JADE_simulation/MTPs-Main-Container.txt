@@ -1,1 +1,1 @@
-http://me1c042-160512.napier-mail.napier.ac.uk:7778/acc
+http://192.168.0.20:7778/acc

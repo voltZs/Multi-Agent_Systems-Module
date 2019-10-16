@@ -22,6 +22,8 @@ public class BuyerAgent extends Agent {
 	private HashMap<String,ArrayList<Offer>> currentOffers = new HashMap<>();
 	private AID tickerAgent;
 	private int numQueriesSent;
+	private int numProposalReplies;
+	private int totalSpent = 0;
 	@Override
 	protected void setup() {
 		//add this agent to the yellow pages
@@ -77,14 +79,19 @@ public class BuyerAgent extends Agent {
 					//spawn new sequential behaviour for day's activities
 					SequentialBehaviour dailyActivity = new SequentialBehaviour();
 					//sub-behaviours will execute in the order they are added
-					dailyActivity.addSubBehaviour(new FindSellers(myAgent));
-					dailyActivity.addSubBehaviour(new SendEnquiries(myAgent));
-					dailyActivity.addSubBehaviour(new CollectOffers(myAgent));
+					if(booksToBuy.size() > 0){
+						dailyActivity.addSubBehaviour(new FindSellers(myAgent));
+						dailyActivity.addSubBehaviour(new SendEnquiries(myAgent));
+						dailyActivity.addSubBehaviour(new CollectOffers(myAgent));
+						dailyActivity.addSubBehaviour(new ProcessOffers(myAgent));
+						dailyActivity.addSubBehaviour(new ListenToOrderConfs(myAgent));
+					}
 					dailyActivity.addSubBehaviour(new EndDay(myAgent));
 					myAgent.addBehaviour(dailyActivity);
 				}
 				else {
 					//termination message to end simulation
+					System.out.println("Total spent for books: £" + totalSpent);
 					myAgent.doDelete();
 				}
 			}
@@ -216,6 +223,100 @@ public class BuyerAgent extends Agent {
 
 	}
 	
+	public class ProcessOffers extends OneShotBehaviour{	
+		
+		private int numOfReplies = 0;
+		
+		public ProcessOffers(Agent a){
+			super(a);
+		}
+		
+		@Override
+		public void action() {
+			numProposalReplies = 0;
+			
+			for (String bookTitle : currentOffers.keySet()){
+				boolean wanted = false;
+				for(String book: booksToBuy){
+					if (book.equals(bookTitle)){
+						//this is a book I want and it's been offered to me
+						wanted = true;
+						break;
+					}
+				}
+				//pick smallest price from offers
+				ArrayList<Offer> offersForBook = currentOffers.get(bookTitle);
+				int lowestPrice = offersForBook.get(0).getPrice(); //init at first element
+				AID bestSeller = offersForBook.get(0).getSeller();  //init at first element
+				for(Offer offer : offersForBook){
+					int currPrice = offer.getPrice();
+					if(currPrice < lowestPrice){
+						lowestPrice = currPrice;
+						bestSeller = offer.getSeller();
+					}
+				}
+				
+				//randomise whether we actually want to buy in the round/today
+				if(Math.random()>0.4){
+					wanted = false;
+				}
+				
+				ACLMessage msg;
+				if(wanted){
+					msg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+//					booksToBuy.remove(booksToBuy.indexOf(bookTitle));
+					numProposalReplies++;
+					System.out.println("Accepting proposal for : " + bookTitle);
+				} else {
+					msg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+					System.out.println("Rejecting proposal for : " + bookTitle);
+				}
+				try{
+					msg.setConversationId(bookTitle);
+					msg.addReceiver(bestSeller);
+					myAgent.send(msg);
+				} catch(Exception e){
+					e.printStackTrace();;
+				}
+			}
+		}
+	}
+	
+	public class ListenToOrderConfs extends Behaviour{
+		private int numReceived = 0;
+		
+		public ListenToOrderConfs(Agent a){
+			super(a);
+		}
+
+		public void action() {
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			ACLMessage msg = myAgent.receive(mt);
+			//need to wrap in this if statement, otherwise the behaviour blocks when the numProposalReplies is 0 and never returns true (0 == 0)
+			if(numProposalReplies>0){
+				if(msg !=null){
+					for(String book:booksToBuy){
+						if(book.equals(msg.getConversationId())){
+							int price = Integer.parseInt(msg.getContent());
+							totalSpent += price;
+							booksToBuy.remove(book);
+							numReceived++;
+							break;
+						}
+					}
+				} else {
+					block();
+				}	
+			}
+		}
+
+		@Override
+		public boolean done() {
+			return numReceived == numProposalReplies;
+		}
+		
+	}
+	
 	
 	
 	public class EndDay extends OneShotBehaviour {
@@ -226,6 +327,7 @@ public class BuyerAgent extends Agent {
 
 		@Override
 		public void action() {
+			System.out.println("I'm here");
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(tickerAgent);
 			msg.setContent("done");
