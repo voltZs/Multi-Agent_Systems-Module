@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;set10111.music_shop.ProperAgent&apos; to &apos;ProperBuyerAgent&apos;&#x0A;- Original project: &apos;JADE_examples&apos;&#x0A;- Original element: &apos;set10111.music_shop.ProperAgent&apos;&#x0A;- Renamed element: &apos;set10111.music_shop.ProperBuyerAgent&apos;&#x0A;- Update references to refactored element&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;ProperAgent&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;set10111.music_shop{ProperAgent.java[ProperAgent" matchStrategy="1" name="ProperBuyerAgent" qualified="false" references="true" similarDeclarations="false" stamp="1571501102084" textual="false" version="1.0"/>
+</session>
