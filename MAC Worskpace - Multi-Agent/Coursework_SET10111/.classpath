@@ -2,5 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="/Users/zsoltvarga/Napier/2019-2020/Trimester_1_(y4)/Multi-Agent Systems/Multi-Agent_Systems-Module/JadeAll/JADE-all-4.5.0/JADE-bin-4.5.0/jade/lib/jade.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

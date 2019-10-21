@@ -1,0 +1,12 @@
+package mas.coursework_ontology.elements;
+
+import jade.content.AgentAction;
+import jade.content.onto.annotations.Slot;
+import jade.core.AID;
+
+public class Sell implements AgentAction{
+	private AID buyer;
+	private List<OrderPair> orderItems;
+	
+
+}

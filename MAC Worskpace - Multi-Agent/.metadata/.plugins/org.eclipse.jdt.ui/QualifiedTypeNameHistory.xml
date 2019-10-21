@@ -1,15 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="jade.core.behaviours.CyclicBehaviour"/>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.io.BufferedReader"/>
 <fullyQualifiedTypeName name="java.io.FileReader"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
 <fullyQualifiedTypeName name="java.io.FileNotFoundException"/>
 <fullyQualifiedTypeName name="java.io.File"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="jade.lang.acl.MessageTemplate"/>
+<fullyQualifiedTypeName name="java.awt.Component"/>
+<fullyQualifiedTypeName name="jade.content.Concept"/>
+<fullyQualifiedTypeName name="jade.content.schema.ObjectSchema"/>
+<fullyQualifiedTypeName name="jade.content.onto.SerializableOntology"/>
+<fullyQualifiedTypeName name="jade.content.onto.BasicOntology"/>
+<fullyQualifiedTypeName name="jade.content.AgentAction"/>
+<fullyQualifiedTypeName name="jade.util.leap.List"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.SupplyChainOntology"/>
+<fullyQualifiedTypeName name="jade.content.Predicate"/>
+<fullyQualifiedTypeName name="jade.content.onto.annotations.Slot"/>
+<fullyQualifiedTypeName name="jade.content.onto.BeanOntologyException"/>
+<fullyQualifiedTypeName name="jade.core.AID"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.SequentialBehaviour"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.OneShotBehaviour"/>
-<fullyQualifiedTypeName name="jade.lang.acl.MessageTemplate"/>
-<fullyQualifiedTypeName name="jade.content.onto.annotations.Slot"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.CalendarNotification"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.Behaviour"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="jade.core.Agent"/>
+<fullyQualifiedTypeName name="jade.core.behaviours.CyclicBehaviour"/>
 </qualifiedTypeNameHistroy>

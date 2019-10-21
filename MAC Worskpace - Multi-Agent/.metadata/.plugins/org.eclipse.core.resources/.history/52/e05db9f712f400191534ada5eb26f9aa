@@ -1,0 +1,20 @@
+package mas.coursework_ontology.elements;
+
+import jade.content.Predicate;
+import jade.content.onto.annotations.Slot;
+
+public class CalendarNotification implements Predicate {
+	private int dayNumber;
+
+	@Slot( mandatory = true)
+	public int getDayNumber() {
+		return dayNumber;
+	}
+
+	public void setDayNumber(int dayNumber) {
+		this.dayNumber = dayNumber;
+	}
+	
+	
+
+}

@@ -1,0 +1,110 @@
+package mas.coursework;
+
+import jade.content.lang.Codec;
+import jade.content.lang.Codec.CodecException;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import mas.coursework.TickerAgent.ManageDaysBehaviour;
+import mas.coursework_ontology.SupplyChainOntology;
+import mas.coursework_ontology.elements.CalendarNotification;
+
+public class ManufacturerAgent extends Agent {
+	
+	private Codec codec = new SLCodec();
+	private Ontology ontology = SupplyChainOntology.getInstance();
+	private AID tickerAgent;
+	
+	protected void setup(){
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(ontology);
+		String[] args = (String[])this.getArguments();
+		
+		DFAgentDescription dfad = new DFAgentDescription();
+		dfad.setName(getAID());
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("manufacturer-agent");
+		sd.setName(getLocalName() + "-manufacturer-agent");
+		dfad.addServices(sd);
+		try {
+			DFService.register(this, dfad);
+		} catch (FIPAException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		addBehaviour(new CalendarListenerBehaviour(this));
+		
+
+	}
+	
+	public class CalendarListenerBehaviour extends CyclicBehaviour{
+		
+		public CalendarListenerBehaviour(Agent a){
+			super(a);
+		}
+		
+		@Override
+		public void action() {
+//			Listen to new day message
+			
+//			if message received, 
+//				if message is newday add sequential behaviour
+//					SequentialBehaviour dailyTasks = new SequentialBehaviour(this);
+//					dailyTasks.addSubBehaviour(new PhoneOrdersListener(myAgent));
+//					dailyTasks.addSubBehaviour(new QueryStocks(myAgent));
+//					dailyTasks.addSubBehaviour(new OrderStocks(myAgent));
+//					dailyTasks.addSubBehaviour(new Manufacture(myAgent));
+//					dailyTasks.addSubBehaviour(new EndDay(myAgent));
+//					myAgent.addBehaviour(dailyTasks);
+//				else kill agent
+//					myAgent.terminate
+//			else 
+//				block()
+		}
+		
+	}
+	
+	public class 
+	
+	public class EndDay extends OneShotBehaviour{
+		
+		public EndDay (Agent a){
+			super(a);
+		}
+		
+		@Override
+		public void action() {
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver(tickerAgent);
+			//send a message to each supplier as well
+			for(AID supplier : suppliers) {
+				msg.addReceiver(supplier);
+			}
+			msg.setLanguage(codec.getName());
+			msg.setOntology(ontology.getName());
+//			creating the message content
+			CalendarNotification dayNotif = new CalendarNotification();
+			dayNotif.setDone(true);
+			try {
+				// Let JADE convert from Java objects to string
+				getContentManager().fillContent(msg, dayNotif);
+				send(msg);
+			} catch (CodecException ce) {
+				ce.printStackTrace();
+			} catch (OntologyException oe) {
+				oe.printStackTrace();
+			}
+		}
+	}
+}
