@@ -21,6 +21,4 @@ public class OrderPair {
 	public void setAmount(int amount) {
 		this.amount = amount;
 	}
-	
-	
 }

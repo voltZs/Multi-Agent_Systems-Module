@@ -1,0 +1,59 @@
+package mas.coursework;
+import mas.coursework_ontology.elements.Component;
+import mas.coursework_ontology.elements.Phablet;
+import mas.coursework_ontology.elements.Phone;
+import mas.coursework_ontology.elements.SmallPhone;
+
+public class PhoneOrderGenerator {
+	Phone phone;
+	Component screen = new Component();
+	Component battery = new Component();
+	Component ram = new Component();
+	Component storage = new Component();
+	
+	public PhoneOrderGenerator(){
+	}
+	
+	public Phone getPhone(){
+		randomize();
+		return phone;
+	}
+	
+	public void randomize(){
+		screen.setType("screen");
+		battery.setType("battery");
+		ram.setType("ram");
+		storage.setType("storage");
+		phone = new Phone();
+		
+		if(Math.random() < 0.5){
+			//small smartphone 
+			phone = (SmallPhone) phone;
+			screen.setIdentifier("5");
+			phone.setScreen(screen);
+			battery.setIdentifier("2000");
+			phone.setBattery(battery);
+		} else {
+			//phablet
+			phone = (Phablet) phone;
+			screen.setIdentifier("7");
+			phone.setScreen(screen);
+			battery.setIdentifier("3000");
+			phone.setBattery(battery);
+		}
+		
+		if(Math.random() < 0.5){
+			details.put("ram", 4);
+		} else {
+			details.put("ram", 8);
+		}
+		
+		if(Math.random() < 0.5){
+			details.put("storage", 64);
+		} else {
+			details.put("storage", 256);
+		}
+		
+		details.put("quantity", (int) Math.floor(1 + 50 * Math.random()));
+	}
+}
