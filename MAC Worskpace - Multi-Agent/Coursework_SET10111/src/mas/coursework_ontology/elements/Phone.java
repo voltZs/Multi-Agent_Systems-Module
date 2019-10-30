@@ -1,40 +1,45 @@
 package mas.coursework_ontology.elements;
 
+import jade.content.onto.OntologyException;
 import jade.content.onto.annotations.Slot;
 
 public class Phone extends Item {
-	protected Component screen;
-	protected Component battery;	
-	protected Component storage;
-	protected Component ram;	
+	protected Screen screen;
+	protected Battery battery;	
+	protected Storage storage;
+	protected RAM ram;
 	
-	public Component getScreen() {
+	@Slot(mandatory=true)
+	public Screen getScreen() throws OntologyException {
 		return screen;
 	}
-	public void setScreen(Component screen) {
+	public void setScreen(Screen screen) {
 		this.screen = screen;
 	}
 	
-	public Component getBattery() {
+	@Slot(mandatory=true)
+	public Battery getBattery() throws OntologyException {
 		return battery;
 	}
-	public void setBattery(Component battery) {
+	public void setBattery(Battery battery) {
 		this.battery = battery;
 	}
 	
-	@Slot (mandatory = true)
-	public Component getStorage() {
+	@Slot(mandatory=true)
+	public Storage getStorage() {
 		return storage;
 	}
-	public void setStorage(Component storage) {
+	public void setStorage(Storage storage) {
 		this.storage = storage;
 	}
 	
-	@Slot (mandatory = true)
-	public Component getRam() {
+	@Slot(mandatory=true)
+	public RAM getRam() {
 		return ram;
 	}
-	public void setRam(Component ram) {
+	public void setRam(RAM ram) {
 		this.ram = ram;
-	}
+	}	
+	
+	
 }

@@ -104,10 +104,10 @@ public class TickerAgent extends Agent{
 				}
 				
 //				send new day message to all simulation agents
-				for(AID agent : simulationAgents){
-					System.out.println(agent.getLocalName());
-				}
-				System.out.println("Broadcasting to " + simulationAgents.size() + " agents: it's day: " + dayCount);
+				System.out.println("----------------------------------------");
+				System.out.println(getAID().getLocalName()+": It's a new day everyone: " + dayCount);
+				System.out.println("Broadcasting to " + simulationAgents.size() + " agents");
+				System.out.println("----------------------------------------");
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				for (AID agent : simulationAgents){
 					msg.addReceiver(agent);
@@ -147,7 +147,6 @@ public class TickerAgent extends Agent{
 						if (ce instanceof CalendarNotification) {
 							CalendarNotification notif = (CalendarNotification) ce;
 							boolean done = notif.isDone();
-							System.out.println("Daydone from "+ message.getSender().getLocalName() + " returned as "+ done);
 							if(done){
 								receivedDoneMessages++;
 							}
@@ -163,7 +162,7 @@ public class TickerAgent extends Agent{
 				else{
 					block();
 				}
-				System.out.println("Receiving done messages: " + receivedDoneMessages);
+				System.out.println(getAID().getLocalName()+": Received " + receivedDoneMessages +" \'done\' messages");
 				if(receivedDoneMessages == simulationAgents.size()){
 					dayCount++;
 					reset();

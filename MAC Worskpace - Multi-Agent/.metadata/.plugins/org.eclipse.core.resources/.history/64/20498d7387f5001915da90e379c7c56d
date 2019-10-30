@@ -1,0 +1,17 @@
+package mas.coursework_ontology.elements;
+
+public class Screen extends Component {
+
+	@Override
+	public String getIdentifier() {
+		// TODO Auto-generated method stub
+		return super.getIdentifier();
+	}
+
+	@Override
+	public void setIdentifier(String identifier) {
+		// TODO Auto-generated method stub
+		super.setIdentifier(identifier);
+	}
+
+}

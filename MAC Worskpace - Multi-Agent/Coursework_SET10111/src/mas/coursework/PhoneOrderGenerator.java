@@ -1,17 +1,21 @@
 package mas.coursework;
+import mas.coursework_ontology.elements.Battery;
 import mas.coursework_ontology.elements.Component;
 import mas.coursework_ontology.elements.Phablet;
 import mas.coursework_ontology.elements.Phone;
+import mas.coursework_ontology.elements.RAM;
+import mas.coursework_ontology.elements.Screen;
 import mas.coursework_ontology.elements.SellPhones;
 import mas.coursework_ontology.elements.SmallPhone;
+import mas.coursework_ontology.elements.Storage;
 
 public class PhoneOrderGenerator {
 	SellPhones order;
 	Phone phone;
-	Component screen;
-	Component battery;
-	Component ram;
-	Component storage;
+	Screen screen;
+	Battery battery;
+	RAM ram;
+	Storage storage;
 	int quantity;
 	int unitPrice;
 	int daysDue;
@@ -22,47 +26,42 @@ public class PhoneOrderGenerator {
 	
 	public SellPhones getOrder(){
 		order = new SellPhones();
-		screen = new Component();
-		battery = new Component();
-		ram = new Component();
-		storage = new Component();
+		screen = new Screen();
+		battery = new Battery();
+		ram = new RAM();
+		storage = new Storage();
 		randomize();
 		return order;
 	}
 	
 	public void randomize(){
-		screen.setType("screen");
-		battery.setType("battery");
-		ram.setType("ram");
-		storage.setType("storage");
-		
 		if(Math.random() < 0.5){
 			//small smartphone 
 			phone = new SmallPhone();
-			screen.setIdentifier("5");
+			screen.setIdentifier("5\"");
 			phone.setScreen(screen);
-			battery.setIdentifier("2000");
+			battery.setIdentifier("2000mAh");
 			phone.setBattery(battery);
 		} else {
 			//phablet
 			phone = new Phablet();
-			screen.setIdentifier("7");
+			screen.setIdentifier("7\"");
 			phone.setScreen(screen);
-			battery.setIdentifier("3000");
+			battery.setIdentifier("3000mAh");
 			phone.setBattery(battery);
 		}
 		
 		if(Math.random() < 0.5){
-			ram.setIdentifier("4");
+			ram.setIdentifier("4Gb");
 		} else {
-			ram.setIdentifier("8");
+			ram.setIdentifier("8Gb");
 		}
 		phone.setRam(ram);
 		
 		if(Math.random() < 0.5){
-			storage.setIdentifier("64");
+			storage.setIdentifier("64Gb");
 		} else {
-			storage.setIdentifier("256");
+			storage.setIdentifier("256Gb");
 		}
 		phone.setStorage(storage);
 		order.setPhone(phone);

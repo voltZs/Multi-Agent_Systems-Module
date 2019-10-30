@@ -1,5 +1,6 @@
 package mas.coursework;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import jade.core.Profile;
@@ -7,18 +8,34 @@ import jade.core.ProfileImpl;
 import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
+import mas.coursework_ontology.elements.Component;
+import mas.coursework_ontology.elements.Screen;
 import mas.coursework_ontology.elements.SellPhones;
 public class SupplyChainSimulation {
 	
 	private static int numOfCustomers = 2;
+	
+	public static HashMap<Component, Integer> warehouse;
 
 	public static void main(String[] args) {
+		
+		warehouse = new HashMap<>();
+		Screen screen = new Screen();
+		screen.setIdentifier("5\"");
+		addScreen(screen);
+		System.out.println(warehouse);
+		screen = new Screen();
+		screen.setIdentifier("7\"");
+		addScreen(screen);
+		System.out.println(warehouse);
+		screen = new Screen();
+		screen.setIdentifier("5\"");
+		addScreen(screen);
+		System.out.println(warehouse);
+		
 		Profile myProfile = new ProfileImpl();
 		Runtime myRuntime = Runtime.instance();
 		try{
-//			PhoneOrderGenerator phoneGenerator = new PhoneOrderGenerator();
-//			SellPhones order = phoneGenerator.getOrder();
-//			System.out.println(order);
 			
 			ContainerController myContainer = myRuntime.createMainContainer(myProfile);	
 			AgentController rma = myContainer.createNewAgent("rma", "jade.tools.rma.rma", null);
@@ -43,6 +60,21 @@ public class SupplyChainSimulation {
 		}
 		catch(Exception e){
 			System.out.println("Exception starting agent: " + e.toString());
+		}
+	}
+	
+	public static void addScreen(Component comp){
+		ArrayList<String> keys = new ArrayList<>();
+		for(Component key : warehouse.keySet()){
+			keys.add(key.getIdentifier());
+		}
+		
+		if(warehouse.containsKey(comp)){
+			int temp = warehouse.get(comp);
+			temp++;
+			warehouse.put(comp, temp);
+		} else {
+		warehouse.put(comp, 1);
 		}
 	}
 

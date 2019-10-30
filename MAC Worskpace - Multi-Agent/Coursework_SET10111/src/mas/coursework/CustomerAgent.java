@@ -131,6 +131,7 @@ public class CustomerAgent extends Agent{
 			msg.setOntology(ontology.getName());
 			PhoneOrderGenerator generator = new PhoneOrderGenerator();
 			SellPhones order = generator.getOrder();
+			System.out.println("price: "+ order.getUnitPrice() * order.getQuantity() +  " penalty: " +  order.getPerDayPenalty());
 
 			// We need to create a wrapper Action
 			// object with the AID and action

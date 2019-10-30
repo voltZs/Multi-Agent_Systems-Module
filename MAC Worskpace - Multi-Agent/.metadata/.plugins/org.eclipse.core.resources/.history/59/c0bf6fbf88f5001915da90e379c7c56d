@@ -1,0 +1,23 @@
+package mas.coursework_ontology.elements;
+
+import jade.content.onto.OntologyException;
+import jade.content.onto.annotations.Slot;
+
+public class SmallPhone extends Phone{
+
+	@Override
+	public Screen getScreen() throws OntologyException {
+		if(super.getScreen().getIdentifier() != "2000mAh"){
+			throw new OntologyException("Screen Component identifier for SmallPhone invalid.");
+		}
+		return super.getScreen();
+	}
+
+	@Override
+	public Battery getBattery() throws OntologyException {
+		if(super.getBattery().getIdentifier() != "2000mAh"){
+			throw new OntologyException("Screen Component identifier for SmallPhone invalid.");
+		}
+		return super.getBattery();
+	}
+}

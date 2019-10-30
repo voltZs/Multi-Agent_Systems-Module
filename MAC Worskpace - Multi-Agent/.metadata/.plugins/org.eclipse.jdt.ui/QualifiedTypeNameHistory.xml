@@ -18,18 +18,23 @@
 <fullyQualifiedTypeName name="jade.core.AID"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.CalendarNotification"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.CyclicBehaviour"/>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="jade.core.Agent"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.OneShotBehaviour"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.SequentialBehaviour"/>
 <fullyQualifiedTypeName name="jade.content.AgentAction"/>
-<fullyQualifiedTypeName name="jade.content.onto.annotations.Slot"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.SmallPhone"/>
 <fullyQualifiedTypeName name="java.awt.Component"/>
-<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Component"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Phablet"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.SellPhones"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Phone"/>
 <fullyQualifiedTypeName name="jade.lang.acl.MessageTemplate"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.Behaviour"/>
+<fullyQualifiedTypeName name="jade.content.onto.annotations.Slot"/>
+<fullyQualifiedTypeName name="jade.content.onto.OntologyException"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Battery"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Storage"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.RAM"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Component"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Screen"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
 </qualifiedTypeNameHistroy>

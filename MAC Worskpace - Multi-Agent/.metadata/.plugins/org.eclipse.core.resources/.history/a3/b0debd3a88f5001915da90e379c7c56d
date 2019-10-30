@@ -1,0 +1,16 @@
+package mas.coursework_ontology.elements;
+
+import jade.content.onto.annotations.Slot;
+
+public class SmallPhone extends Phone{
+
+	@Override
+	public Screen getScreen() {
+		return super.getScreen();
+	}
+
+	@Override
+	public Battery getBattery() {
+		return super.getBattery();
+	}
+}

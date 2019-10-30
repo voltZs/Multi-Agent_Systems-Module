@@ -4,7 +4,7 @@ import jade.content.onto.annotations.Slot;
 
 public class OrderPair {
 	private Item item;
-	private int amount;
+	private int quantity;
 	
 	@Slot(mandatory = true)
 	public Item getOrderedItem() {
@@ -15,10 +15,10 @@ public class OrderPair {
 	}
 	
 	@Slot(mandatory = true)
-	public int getAmount() {
-		return amount;
+	public int getQuantity() {
+		return quantity;
 	}
-	public void setAmount(int amount) {
-		this.amount = amount;
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 }

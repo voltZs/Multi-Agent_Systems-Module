@@ -100,7 +100,6 @@ public class ManufacturerAgent extends Agent {
 							} catch (FIPAException e) {
 								e.printStackTrace();
 							}
-							System.out.println("I have " + customers.size()+ " customers");
 							
 							SequentialBehaviour dailyTasks = new SequentialBehaviour();
 							dailyTasks.addSubBehaviour(new PhoneOrdersListener(myAgent));
@@ -150,7 +149,7 @@ public class ManufacturerAgent extends Agent {
 					ContentElement ce = null;
 //					System.out.println(msg.getContent()); 
 					// Let JADE convert from String to Java objects
-					// Output will be a ContentElement
+					// Output will be a ContentElements
 					ce = getContentManager().extractContent(msg);
 					if(ce instanceof Action) {
 						Concept action = ((Action)ce).getAction();
@@ -160,10 +159,8 @@ public class ManufacturerAgent extends Agent {
 //							logic for processing the order or whatnot
 							ACLMessage reply = msg.createReply();
 							reply.setPerformative(ACLMessage.AGREE);
-							System.out.println(msg.getSender().getLocalName());
 							myAgent.send(reply);
 							orderCount++;
-							System.out.println("Received another phones order");
 						}
 					}
 				} catch (CodecException ce) {
@@ -202,7 +199,6 @@ public class ManufacturerAgent extends Agent {
 				DFAgentDescription[] foundAgents = DFService.search(myAgent, dfd);
 				for(DFAgentDescription ad : foundAgents){
 					suppliers.add(ad.getName());
-					System.out.println(ad.getName());
 				}
 			} catch (FIPAException e) {
 				// TODO Auto-generated catch block

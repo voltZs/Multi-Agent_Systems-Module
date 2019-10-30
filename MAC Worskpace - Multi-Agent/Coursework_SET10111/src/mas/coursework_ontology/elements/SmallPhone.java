@@ -1,24 +1,25 @@
 package mas.coursework_ontology.elements;
 
+import jade.content.onto.OntologyException;
 import jade.content.onto.annotations.Slot;
 
 public class SmallPhone extends Phone{
-	
-	@Slot(mandatory = true)
-	public Component getScreen() {
-		return screen;
+
+	@Override
+	public Screen getScreen() throws OntologyException {
+		String identifier = super.getScreen().getIdentifier();
+		if(!identifier.equals("5\"")){
+			throw new OntologyException("Screen identifier" + identifier + " for SmallPhone invalid.");
+		}
+		return super.getScreen();
 	}
-	public void setScreen(Component screen) {
-		this.screen = screen;
+
+	@Override
+	public Battery getBattery() throws OntologyException {
+		String identifier = super.getBattery().getIdentifier();
+		if(!identifier.equals("2000mAh")){
+			throw new OntologyException("Battery identifier "+ identifier +" for SmallPhone invalid.");
+		}
+		return super.getBattery();
 	}
-	
-	@Slot(mandatory = true)
-	public Component getBattery() {
-		return battery;
-	}
-	public void setBattery(Component battery) {
-		this.battery = battery;
-	}
-	
-	
 }
