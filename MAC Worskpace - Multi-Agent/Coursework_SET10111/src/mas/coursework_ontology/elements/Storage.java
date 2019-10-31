@@ -15,4 +15,13 @@ public class Storage extends Component{
 		super.setIdentifier(identifier);
 	}
 	
+	@Override
+	@Slot(permittedValues = {"storage"})
+	public String getType() {
+		return super.getType();
+	}
+	@Override
+	public void setType(String type) {
+		super.setType(type);
+	}
 }

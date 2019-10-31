@@ -1,0 +1,13 @@
+package mas.coursework;
+
+import java.util.HashMap;
+
+import mas.coursework_ontology.elements.Component;
+
+public class SupplierCatalogueBuilder {
+	
+	private HashMap<Component, Integer> catalogue;
+	
+	public Sup
+
+}

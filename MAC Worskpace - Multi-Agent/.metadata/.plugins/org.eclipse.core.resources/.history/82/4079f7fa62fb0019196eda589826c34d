@@ -1,0 +1,17 @@
+package mas.coursework;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import mas.coursework_ontology.elements.Component;
+
+public class SupplierCatalogue {
+	
+	private HashMap<Component, Integer> catalogue;
+	
+	public SupplierCatalogue(int type){
+		ArrayList<String[]> csv = CSVReader.readCSV("/Coursework_SET10111/Sellers_catalogue.csv");
+		System.out.println(csv);
+	}
+
+}

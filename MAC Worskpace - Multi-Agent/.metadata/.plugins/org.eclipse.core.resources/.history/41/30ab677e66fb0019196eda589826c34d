@@ -1,0 +1,48 @@
+package mas.coursework;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import mas.coursework_ontology.elements.Battery;
+import mas.coursework_ontology.elements.Component;
+import mas.coursework_ontology.elements.RAM;
+import mas.coursework_ontology.elements.Screen;
+import mas.coursework_ontology.elements.Storage;
+
+public class SupplierCatalogue {
+	
+	private HashMap<Component, Integer> catalogue;
+	
+	public SupplierCatalogue(int type){
+		ArrayList<String[]> csv = CSVReader.readCSV(
+				"/Users/zsoltvarga/Napier/2019-2020/Trimester_1_(y4)/"
+				+ "Multi-Agent Systems/Multi-Agent_Systems-Module/"
+				+ "MAC Worskpace - Multi-Agent/Coursework_SET10111/"
+				+ "Sellers_catalogue.csv");
+		for (String[] array: csv ){
+			Component component = null;
+			switch (array[0]){
+				case "screen":
+					component = new Screen();
+					break;
+				case "storage":
+					component = new Storage();
+					break;
+				case "ram":
+					component = new RAM();
+					break;
+				case "battery":
+					component = new Battery();
+					break;
+			}
+			if (component != null){
+				component.setIdentifier(array[1]);
+				Integer price = Integer.parseInt(array[2+type]);
+				catalogue.put(component, price);
+			}
+			System.out.println();
+		}
+		System.out.println(csv);
+	}
+
+}

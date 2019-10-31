@@ -27,9 +27,13 @@ public class PhoneOrderGenerator {
 	public SellPhones getOrder(){
 		order = new SellPhones();
 		screen = new Screen();
+		screen.setType("screen");
 		battery = new Battery();
+		battery.setType("battery");
 		ram = new RAM();
+		ram.setType("ram");
 		storage = new Storage();
+		storage.setType("storage");
 		randomize();
 		return order;
 	}

@@ -4,6 +4,7 @@ import jade.content.onto.annotations.Slot;
 
 public class Component extends Item {
 	private String identifier;
+	private String type;
 	
 	@Slot(mandatory = true)
 	public String getIdentifier() {
@@ -13,6 +14,12 @@ public class Component extends Item {
 		this.identifier = identifier;
 	}
 	
+	@Slot(mandatory = true)
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
 	
-
 }

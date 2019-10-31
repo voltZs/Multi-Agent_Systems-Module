@@ -1,0 +1,17 @@
+package mas.coursework;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import mas.coursework_ontology.elements.Component;
+
+public class SupplierCatalogue {
+	
+	private HashMap<Component, Integer> catalogue;
+	
+	public SupplierCatalogue(int type){
+		ArrayList<String[]> csv = CSVReader.readCSV("/Users/zsoltvarga/Napier/2019-2020/Trimester_1_(y4)/Multi-Agent Systems/Multi-Agent_Systems-Module/MAC Worskpace - Multi-Agent/Coursework_SET10111/Sellers_catalogue.csv");
+		System.out.println(csv);
+	}
+
+}

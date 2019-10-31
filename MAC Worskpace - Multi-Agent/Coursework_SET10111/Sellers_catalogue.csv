@@ -1,0 +1,9 @@
+type,identifier,price1,price2
+screen,5",100,
+screen,7",150,
+storage,64Gb,25,15
+storage,256Gb,50,40
+ram,4Gb,30,20
+ram,8Gb,60,35
+battery,2000mAh,70,
+battery,3000mAh,100,

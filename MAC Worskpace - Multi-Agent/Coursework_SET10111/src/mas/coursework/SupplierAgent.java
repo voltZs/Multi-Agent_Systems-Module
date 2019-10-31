@@ -2,12 +2,15 @@ package mas.coursework;
 
 import java.util.ArrayList;
 
+import jade.content.Concept;
 import jade.content.ContentElement;
+import jade.content.Predicate;
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -27,7 +30,7 @@ import mas.coursework.ManufacturerAgent.PhoneOrdersListener;
 import mas.coursework.ManufacturerAgent.QueryStocks;
 import mas.coursework.ManufacturerAgent.StockResponseListener;
 import mas.coursework_ontology.SupplyChainOntology;
-import mas.coursework_ontology.elements.CalendarNotification;
+import mas.coursework_ontology.elements.*;
 
 public class SupplierAgent extends Agent{
 	
@@ -36,11 +39,22 @@ public class SupplierAgent extends Agent{
 	
 	private AID tickerAgent;
 	private AID manufacturerAgent;
+	private int agentType;
+	SupplierCatalogue catalogue;
 	
 	protected void setup(){
+//		get arguments passed in when creating agent
+		Object[] args = this.getArguments();
+		agentType = (int) args[0];
+		int wait = (int)(Math.random()*1000);
+		System.out.println("Waiting:" +  wait);
+		doWait(wait);
+		System.out.println("Supplier type: " + agentType);
+		
+		catalogue = new SupplierCatalogue(agentType);
+		catalogue.printCalatogue();
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
-		String[] args = (String[])this.getArguments();
 		
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(getAID());
@@ -153,6 +167,57 @@ public class SupplierAgent extends Agent{
 //			listen to queries about stock - HasInStock
 //			if in stock - reply CONFIRM
 //			otherwise DISCONFIRM
+//			listen to phone orders from customers, end when all customers have sent out an order
+
+			//This behaviour should only respond to REQUEST messages
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.QUERY_IF); 
+			ACLMessage msg = receive(mt);
+			if(msg != null){
+				try {
+					ContentElement ce = null;
+					System.out.println("SUPPLIER STOCKCHECK "+msg.getContent()); 
+					// Let JADE convert from String to Java objects
+					// Output will be a ContentElements
+					ce = getContentManager().extractContent(msg);
+					if(ce instanceof HasInStock) {
+						HasInStock hasInStock = (HasInStock) ce;
+						Component queriedItem = (Component) hasInStock.getItem();
+						ACLMessage reply = msg.createReply();
+						
+						if (queriedItem != null){
+							int result = catalogue.checkIfSold(queriedItem.getType(), queriedItem.getIdentifier());
+							if(result != 0){
+								reply.setPerformative(ACLMessage.CONFIRM);
+								HasInStock confirmation = hasInStock;
+//								set self as owner so the receiver knows which seller this is about directly from the content field 
+								confirmation.setOwner(getAID());
+								confirmation.setPrice(result);
+								try {
+									 // Let JADE convert from Java objects to string
+									 getContentManager().fillContent(reply, confirmation);
+								}catch (CodecException cExc) {
+									cExc.printStackTrace();
+								} catch (OntologyException oExc) {
+									oExc.printStackTrace();
+								} 
+							} else {
+//								this item is not in catalogue
+								reply.setPerformative(ACLMessage.DISCONFIRM);
+							}
+						} else {
+//							also send disconfirm message when the queried item didn't parse as a Component
+							reply.setPerformative(ACLMessage.DISCONFIRM);
+						}
+						send(reply);
+					}	
+				} catch (CodecException coExc) {
+					coExc.printStackTrace();
+				} catch (OntologyException onExc) {
+					onExc.printStackTrace();
+				}
+			} else {
+				block();
+			}
 		}
 	}
 	

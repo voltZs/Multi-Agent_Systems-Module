@@ -15,4 +15,14 @@ public class RAM extends Component{
 		super.setIdentifier(identifier);
 	}
 
+	@Override
+	@Slot(permittedValues = {"ram"})
+	public String getType() {
+		return super.getType();
+	}
+	@Override
+	public void setType(String type) {
+		super.setType(type);
+	}
+	
 }

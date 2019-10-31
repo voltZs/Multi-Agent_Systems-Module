@@ -14,5 +14,15 @@ public class Screen extends Component {
 	public void setIdentifier(String identifier) {
 		super.setIdentifier(identifier);
 	}
+	
+	@Override
+	@Slot(permittedValues = {"screen"})
+	public String getType() {
+		return super.getType();
+	}
+	@Override
+	public void setType(String type) {
+		super.setType(type);
+	}
 
 }

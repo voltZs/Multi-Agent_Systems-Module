@@ -15,4 +15,14 @@ public class Battery extends Component {
 		super.setIdentifier(identifier);
 	}
 	
+	@Override
+	@Slot(permittedValues = {"battery"})
+	public String getType() {
+		return super.getType();
+	}
+	@Override
+	public void setType(String type) {
+		super.setType(type);
+	}
+	
 }

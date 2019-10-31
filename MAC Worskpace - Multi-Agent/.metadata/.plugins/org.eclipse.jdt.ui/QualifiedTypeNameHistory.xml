@@ -5,7 +5,6 @@
 <fullyQualifiedTypeName name="java.io.IOException"/>
 <fullyQualifiedTypeName name="java.io.FileNotFoundException"/>
 <fullyQualifiedTypeName name="java.io.File"/>
-<fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="jade.content.Concept"/>
 <fullyQualifiedTypeName name="jade.content.schema.ObjectSchema"/>
 <fullyQualifiedTypeName name="jade.content.onto.SerializableOntology"/>
@@ -13,7 +12,6 @@
 <fullyQualifiedTypeName name="jade.util.leap.List"/>
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.SupplyChainOntology"/>
-<fullyQualifiedTypeName name="jade.content.Predicate"/>
 <fullyQualifiedTypeName name="jade.content.onto.BeanOntologyException"/>
 <fullyQualifiedTypeName name="jade.core.AID"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.CalendarNotification"/>
@@ -29,12 +27,16 @@
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Phone"/>
 <fullyQualifiedTypeName name="jade.lang.acl.MessageTemplate"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.Behaviour"/>
-<fullyQualifiedTypeName name="jade.content.onto.annotations.Slot"/>
 <fullyQualifiedTypeName name="jade.content.onto.OntologyException"/>
-<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Battery"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Screen"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Storage"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.RAM"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Battery"/>
+<fullyQualifiedTypeName name="jade.content.Predicate"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.HasInStock"/>
+<fullyQualifiedTypeName name="jade.content.onto.annotations.Slot"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Item"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Component"/>
-<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Screen"/>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
 </qualifiedTypeNameHistroy>
