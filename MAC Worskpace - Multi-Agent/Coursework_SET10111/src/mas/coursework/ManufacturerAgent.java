@@ -2,6 +2,7 @@ package mas.coursework;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -25,11 +26,15 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import mas.coursework.TickerAgent.ManageDaysBehaviour;
 import mas.coursework_ontology.SupplyChainOntology;
+import mas.coursework_ontology.elements.Battery;
 import mas.coursework_ontology.elements.CalendarNotification;
 import mas.coursework_ontology.elements.Component;
 import mas.coursework_ontology.elements.HasInStock;
 import mas.coursework_ontology.elements.Item;
+import mas.coursework_ontology.elements.OrderPair;
 import mas.coursework_ontology.elements.Phone;
+import mas.coursework_ontology.elements.Screen;
+import mas.coursework_ontology.elements.SellComponents;
 import mas.coursework_ontology.elements.SellPhones;
 
 public class ManufacturerAgent extends Agent {
@@ -44,6 +49,8 @@ public class ManufacturerAgent extends Agent {
 	private int componentQueriesToday;
 	private int componentOrdersToday;
 	
+	private Warehouse warehouse = new Warehouse(5);
+	private PhoneOrdersManager phoneOrdersMngr = new PhoneOrdersManager();
 	private HashMap<String, HashMap> supplierComponentsDaily = new HashMap<>();
 
 	protected void setup() {
@@ -63,6 +70,19 @@ public class ManufacturerAgent extends Agent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+//		Screen someScreen = new Screen();
+//		someScreen.setIdentifier("7\"");
+//		someScreen.setType("screen");
+//		Battery someBattery = new Battery();
+//		someBattery.setIdentifier("2000mAh");
+//		someBattery.setType("battery");
+//		warehouse.addToWarehouse(someScreen);
+//		System.out.println(warehouse.toString());
+//		warehouse.incrementNewDay();
+//		warehouse.addToWarehouse(someBattery);
+//		System.out.println(warehouse.toString());
+		
 
 		addBehaviour(new CalendarListenerBehaviour(this));
 
@@ -78,6 +98,7 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			// Listen to new day message
 			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+			
 			ACLMessage message = receive(mt);
 			// if message received,
 			if (message != null) {
@@ -172,7 +193,7 @@ public class ManufacturerAgent extends Agent {
 							// logic for accepting or rejecting order
 							// logic for accepting or rejecting order
 							// and based on that AGREE or REFUSE
-
+							phoneOrdersMngr.addOrder(order);
 							ACLMessage reply = msg.createReply();
 							reply.setPerformative(ACLMessage.AGREE);
 							myAgent.send(reply);
@@ -286,12 +307,12 @@ public class ManufacturerAgent extends Agent {
 							if (queriedItem != null) {
 	//							LOGIC FOR HANDLING ITEMS THAT HAVE BEEN CONFIRMED TO BE IN STOCK
 								System.out.println(" queried item: " + queriedItem.getType() + " identif: " + queriedItem.getIdentifier() + "Sold for : " + hasInStock.getPrice());
-								if(supplierComponentsDaily.get(queriedItem.getType()) != null &)
-									THIS IS A SHIT APPROACH AHHHHHHHHHH
-								HashMap<String, ArrayList> innerHashmap = new HashMap<>();
-								ArrayList<HasInStock> availableStock
-								innerHashmap.put(queriedItem.getIdentifier(), );
-								supplierComponentsDaily.put(queriedItem.getType(), innerHashmap);
+//								if(supplierComponentsDaily.get(queriedItem.getType()) != null &)
+//									THIS IS A SHIT APPROACH AHHHHHHHHHH
+//								HashMap<String, ArrayList> innerHashmap = new HashMap<>();
+//								ArrayList<HasInStock> availableStock
+//								innerHashmap.put(queriedItem.getIdentifier(), );
+//								supplierComponentsDaily.put(queriedItem.getType(), innerHashmap);
 							}
 						}	
 					} catch (CodecException coExc) {
@@ -343,44 +364,46 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			componentOrdersToday = 0;
 			
-//			create orders here based on the previously queried components
+//			ENCLOSE IN FOR LOOP - separate orders FOR EACH SUPPLIER
+//			example order ordering
+			AID supplier = suppliers.get(0);
+			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+			msg.setLanguage(codec.getName());
+			msg.setOntology(ontology.getName());
+			msg.addReceiver(supplier);
+
+			// Change this based on what needs to be ordered
+			SellComponents sellComponents = new SellComponents();
+			ArrayList<OrderPair> orderPairs =  new ArrayList<>();
+			OrderPair compPair = new OrderPair();
+			Component component = new Component();
+			component.setType("screen");
+			component.setIdentifier("5\"");
+			compPair.setOrderedItem(component);
+			compPair.setQuantity(2);
+			orderPairs.add(compPair);
+			sellComponents.setBuyer(myAgent.getAID());
+			sellComponents.setOrderPairs(orderPairs);
 			
-			System.out.println("I have this many suppliers: " + suppliers.size());
-			for(AID supplier : suppliers){
-				System.out.print(supplier.getLocalName()+", ");
-				System.out.println();
+			Action request = new Action();
+			request.setAction(sellComponents);
+			request.setActor(supplier); 
+			
+			try {
+				getContentManager().fillContent(msg, request);
+			} catch (CodecException conExc) {
+				conExc.printStackTrace();
+			} catch (OntologyException ontExc) {
+				ontExc.printStackTrace();
 			}
 			
-			for (AID supplier : suppliers) {
-				ACLMessage msg = new ACLMessage(ACLMessage.QUERY_IF);
-				msg.setLanguage(codec.getName());
-				msg.setOntology(ontology.getName());	
-				HasInStock hasInStock = new HasInStock();	
-				msg.addReceiver(supplier);
-				
-//				Change this based on what needs queried
-				Component component = new Component();
-				component.setType("screen");
-				component.setIdentifier("5\"");
-				hasInStock.setItem((Item)component);
-				hasInStock.setOwner(supplier); // these are arbitrary but need to be filled in as predicates don't allow optional slots
-				hasInStock.setPrice(0);
-				
-				try {
-					getContentManager().fillContent(msg, hasInStock);
-				} catch(CodecException conExc){
-					conExc.printStackTrace();
-				} catch (OntologyException ontExc) {
-					ontExc.printStackTrace();
-				}
-				
-				send(msg);
-				componentOrdersToday++;
-			}
+			send(msg);
+			componentOrdersToday++;
 		}
 	}
 
 	public class OrderConfirmationListener extends Behaviour {
+		int receivedOrderResponses = 0;
 
 		public OrderConfirmationListener(Agent a) {
 			super(a);
@@ -388,14 +411,44 @@ public class ManufacturerAgent extends Agent {
 
 		@Override
 		public void action() {
-			// TODO Auto-generated method stub
+			//This behaviour should only respond to REQUEST messages
+			MessageTemplate mt = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE),
+													MessageTemplate.MatchPerformative(ACLMessage.REFUSE)); 
+			ACLMessage msg = receive(mt);
+			if(msg != null){
+				System.out.println("ORDERRESPONSE: " + msg.getContent());
+				if(msg.getPerformative() == ACLMessage.AGREE){
+					
+				} else {
+//					LOGIC FOR HANDLING ITEMS THAT HAVE BEEN DISCONFIRMED TO BE IN STOCK
+					System.out.println("Order did not go through");
+				}
+				receivedOrderResponses++;
+				System.out.println("Order Responses received: " + receivedOrderResponses);
+				System.out.println("componentOrdersToday: " + componentOrdersToday);
+			} else {
+				System.out.println("Blocking OrderConfirmationListener");
+				block();
+			}
+		}
 
+		@Override
+		public void reset() {
+			super.reset();
+			receivedOrderResponses = 0;
+			componentOrdersToday = 0;
+		}
+		
+		@Override
+		public int onEnd() {
+			reset();
+			return super.onEnd();
 		}
 
 		@Override
 		public boolean done() {
 			// TODO Auto-generated method stub
-			return true;
+			return receivedOrderResponses == componentOrdersToday ;
 		}
 
 	}
@@ -422,6 +475,16 @@ public class ManufacturerAgent extends Agent {
 
 		@Override
 		public void action() {
+//			CALCULATE DAILY PROFIT 
+//			Double todaysProfit = TotalValueOfOrdersShipped() 
+//						- phoneOrdersMngr.calculateLateOrders() 
+//						- warehouse.calculateStorageCharge() 
+//						- SuppliesPurchased();
+			
+//			Increment values for the next day
+			warehouse.incrementNewDay();
+			phoneOrdersMngr.incrementNewDay();
+			
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(tickerAgent);
 			// send a message to each supplier as well

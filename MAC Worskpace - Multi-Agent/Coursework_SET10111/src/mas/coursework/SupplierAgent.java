@@ -47,7 +47,6 @@ public class SupplierAgent extends Agent{
 		Object[] args = this.getArguments();
 		agentType = (int) args[0];
 		int wait = (int)(Math.random()*1000);
-		System.out.println("Waiting:" +  wait);
 		doWait(wait);
 		System.out.println("Supplier type: " + agentType);
 		
@@ -231,6 +230,45 @@ public class SupplierAgent extends Agent{
 		public void action() {
 //			listen for component orders
 //			when received, check if component is in stock and ACCEPT / REFUSE
+
+			//This behaviour should only respond to REQUEST messages
+			MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST); 
+			ACLMessage msg = receive(mt);
+			if(msg != null){
+				try {
+					ContentElement ce = null;
+					System.out.println("SUPPLIER ORDERRECEIVED "+msg.getContent()); 
+					// Let JADE convert from String to Java objects
+					// Output will be a ContentElements
+					ce = getContentManager().extractContent(msg);
+					if (ce instanceof Action) {
+						Concept action = ((Action) ce).getAction();
+						if(action instanceof SellComponents){
+							ACLMessage reply = msg.createReply();
+							reply.setPerformative(ACLMessage.AGREE);
+							SellComponents orderAction = (SellComponents) action;
+							ArrayList<OrderPair> order = (ArrayList<OrderPair>) orderAction.getOrderPairs();
+							AID buyer = orderAction.getBuyer();
+							boolean allInStock = true;
+							for (OrderPair pair : order){
+								Component orderedComponent = (Component) pair.getOrderedItem();
+								if(catalogue.checkIfSold(orderedComponent.getType(), orderedComponent.getIdentifier()) <= 0){
+									allInStock = false;
+									reply.setPerformative(ACLMessage.REFUSE);
+									break;
+								}
+							}
+							send(reply);
+						}
+					}	
+				} catch (CodecException coExc) {
+					coExc.printStackTrace();
+				} catch (OntologyException onExc) {
+					onExc.printStackTrace();
+				}
+			} else {
+				block();
+			}
 		}
 	}
 	

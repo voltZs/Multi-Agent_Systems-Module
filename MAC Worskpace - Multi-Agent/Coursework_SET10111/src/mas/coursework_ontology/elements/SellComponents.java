@@ -9,6 +9,8 @@ import jade.core.AID;
 public class SellComponents implements AgentAction{
 	private AID buyer;
 	private List<OrderPair> orderPairs;
+	private int deliveryTime;
+	private int orderID;
 	
 	@Slot(mandatory = true)
 	public AID getBuyer() {
@@ -24,5 +26,19 @@ public class SellComponents implements AgentAction{
 	}
 	public void setOrderPairs(List<OrderPair> orderPairs) {
 		this.orderPairs = orderPairs;
+	}
+	
+	public int getOrderID() {
+		return orderID;
+	}
+	public void setOrderID(int orderID) {
+		this.orderID = orderID;
+	}
+	
+	public int getDeliveryTime() {
+		return deliveryTime;
+	}
+	public void setDeliveryTime(int deliveryTime) {
+		this.deliveryTime = deliveryTime;
 	}
 }

@@ -1,0 +1,27 @@
+package mas.coursework;
+
+import java.util.HashMap;
+
+import mas.coursework_ontology.elements.SellPhones;
+
+public class PhoneOrdersManager {
+
+	private HashMap<SellPhones, Integer> phoneOrders;
+	
+	public PhoneOrdersManager(){
+		phoneOrders = new HashMap<>();
+	}
+	
+	public void addOrder(SellPhones order){
+		phoneOrders.put(order, 0);
+	}
+
+	public void incrementNewDay() {
+		for(SellPhones phoneOrder : phoneOrders.keySet()){
+			int currentAmnt = phoneOrders.get(phoneOrder);
+			phoneOrders.put(phoneOrder, currentAmnt + 1);
+		}
+		
+	}
+	
+}

@@ -104,10 +104,10 @@ public class TickerAgent extends Agent{
 				}
 				
 //				send new day message to all simulation agents
-				System.out.println("----------------------------------------");
+				System.out.println("--------------------------------------------------------------------------------");
 				System.out.println(getAID().getLocalName()+": It's a new day everyone: " + dayCount);
 				System.out.println("Broadcasting to " + simulationAgents.size() + " agents");
-				System.out.println("----------------------------------------");
+				System.out.println("--------------------------------------------------------------------------------");
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				for (AID agent : simulationAgents){
 					msg.addReceiver(agent);
