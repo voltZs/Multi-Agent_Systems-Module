@@ -19,20 +19,6 @@ public class SupplyChainSimulation {
 
 	public static void main(String[] args) {
 		
-		warehouse = new HashMap<>();
-		Screen screen = new Screen();
-		screen.setIdentifier("5\"");
-		addScreen(screen);
-		System.out.println(warehouse);
-		screen = new Screen();
-		screen.setIdentifier("7\"");
-		addScreen(screen);
-		System.out.println(warehouse);
-		screen = new Screen();
-		screen.setIdentifier("5\"");
-		addScreen(screen);
-		System.out.println(warehouse);
-		
 		Profile myProfile = new ProfileImpl();
 		Runtime myRuntime = Runtime.instance();
 		try{

@@ -30,7 +30,7 @@ public class TickerAgent extends Agent{
 	private Ontology ontology = SupplyChainOntology.getInstance();
 	
 	private int dayCount = 0;
-	private int dayMAX = 100;
+	private int dayMAX = 3;
 	private ArrayList<AID> simulationAgents = new ArrayList<>();
 	
 	protected void setup(){
@@ -51,7 +51,7 @@ public class TickerAgent extends Agent{
 		}
 		
 		//wait 5 seconds so other agents can discover the tickerAgent
-		doWait(15000);
+		doWait(4000);
 		addBehaviour(new ManageDaysBehaviour(this));
 	}
 	
@@ -105,7 +105,7 @@ public class TickerAgent extends Agent{
 				
 //				send new day message to all simulation agents
 				System.out.println("--------------------------------------------------------------------------------");
-				System.out.println(getAID().getLocalName()+": It's a new day everyone: " + dayCount);
+				System.out.println(getAID().getLocalName()+": It's a new day everyone: " + (dayCount+1));
 				System.out.println("Broadcasting to " + simulationAgents.size() + " agents");
 				System.out.println("--------------------------------------------------------------------------------");
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -162,7 +162,6 @@ public class TickerAgent extends Agent{
 				else{
 					block();
 				}
-				System.out.println(getAID().getLocalName()+": Received " + receivedDoneMessages +" \'done\' messages");
 				if(receivedDoneMessages == simulationAgents.size()){
 					dayCount++;
 					reset();

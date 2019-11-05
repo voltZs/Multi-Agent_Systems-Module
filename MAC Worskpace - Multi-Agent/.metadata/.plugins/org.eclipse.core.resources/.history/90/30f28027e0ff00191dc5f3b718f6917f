@@ -1,0 +1,109 @@
+package mas.coursework;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import jade.core.AID;
+import mas.coursework_ontology.elements.Component;
+import mas.coursework_ontology.elements.HasInStock;
+import mas.coursework_ontology.elements.OrderPair;
+import mas.coursework_ontology.elements.SellComponents;
+import mas.coursework_ontology.elements.SellPhones;
+
+public class ProfitBrain {
+	private ArrayList<Double> dailyProfits;
+	private HashMap<String, HashMap> componentMarket = new HashMap<>();
+	
+	public ProfitBrain(){
+		dailyProfits = new ArrayList<>();
+		componentMarket = new HashMap<>();
+	}
+	
+	/*
+	 * Returns boolean - whether order is perceived to increase profit
+	 */
+	public boolean decideOnPhoneOrder(SellPhones order, PhoneOrdersManager manager) {
+		return true;
+	}
+
+	public ArrayList<SellComponents> decideWhatToOrder(Warehouse warehouse, PhoneOrdersManager phoneOrdersMngr) {
+		return null;
+	}
+	
+	public void todaysProfit(Warehouse warehouse, PhoneOrdersManager phoneOrdersMngr) {
+		Double todaysProfit = totalValueOfOrdersShipped() 
+				- phoneOrdersMngr.calculateLateOrders() 
+				- warehouse.calculateStorageCharge() 
+				- componentPurchaseValue(warehouse.getTodaysPurchases());
+		dailyProfits.add(todaysProfit);
+	}
+	
+	private Double totalValueOfOrdersShipped() {
+		return 0.0;
+	}
+
+	private int componentPurchaseValue(ArrayList<SellComponents> todaysPurchases) {
+		int sum = 0;
+		for(SellComponents order : todaysPurchases){
+			AID seller = order.getSeller();
+			for (OrderPair pair : order.getOrderPairs()){
+				int amnt = pair.getQuantity();
+				Component comp = (Component) pair.getOrderedItem();
+				for(int i=0; i<amnt; i++){
+					ArrayList<BuyingOption> options = (ArrayList<BuyingOption>) componentMarket.get(comp.getType()).get(comp.getIdentifier());
+					for (BuyingOption option : options){
+						if(option.supplierID == seller){
+							sum += option.price;
+							break;
+						}
+					}
+				}
+			}
+		}
+		return sum;
+	}
+
+	public void updateComponentMarket(HasInStock stockUpdate){
+		Component comp = (Component) stockUpdate.getItem();
+		int deliveryTime = stockUpdate.getDeliveryTime();
+		int price = stockUpdate.getPrice();
+		AID seller = stockUpdate.getOwner();
+		BuyingOption option = new BuyingOption(seller, price, deliveryTime);
+		
+		HashMap<String, ArrayList> optionsByType = componentMarket.get(comp.getType());
+		ArrayList<BuyingOption> optionsByIdent = null;
+		if(optionsByType == null){
+			optionsByType = new HashMap<>();
+			componentMarket.put(comp.getType(), optionsByType);
+		} else {
+			optionsByIdent = optionsByType.get(comp.getIdentifier());
+		}
+		if(optionsByIdent == null){
+			optionsByIdent = new ArrayList<>();
+			componentMarket.get(comp.getType()).put(comp.getIdentifier(), optionsByIdent);
+		} else {
+//			options for this component already exist - check if this specific option is existent
+			for(BuyingOption existingOpt : optionsByIdent){
+				if(existingOpt.supplierID.equals(option.supplierID)){
+					return;
+				}
+				optionsByIdent.add(option);
+			}
+		}
+	}
+	
+	private class BuyingOption{
+		public AID supplierID;
+		public int price;
+		public int deliveryTime;	
+		
+		public BuyingOption(AID supplierID, int price, int deliveryTime){
+			this.supplierID = supplierID;
+			this.price = price;
+			this.deliveryTime = deliveryTime;
+		}
+	}
+
+}
+
+

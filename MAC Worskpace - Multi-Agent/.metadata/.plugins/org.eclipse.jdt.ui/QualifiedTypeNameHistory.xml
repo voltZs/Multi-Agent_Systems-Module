@@ -12,7 +12,6 @@
 <fullyQualifiedTypeName name="jade.util.leap.List"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.SupplyChainOntology"/>
 <fullyQualifiedTypeName name="jade.content.onto.BeanOntologyException"/>
-<fullyQualifiedTypeName name="jade.core.AID"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.CalendarNotification"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.CyclicBehaviour"/>
 <fullyQualifiedTypeName name="jade.core.Agent"/>
@@ -27,20 +26,23 @@
 <fullyQualifiedTypeName name="jade.lang.acl.MessageTemplate"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.Behaviour"/>
 <fullyQualifiedTypeName name="jade.content.onto.OntologyException"/>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Storage"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.RAM"/>
 <fullyQualifiedTypeName name="jade.content.Predicate"/>
-<fullyQualifiedTypeName name="mas.coursework_ontology.elements.HasInStock"/>
 <fullyQualifiedTypeName name="jade.content.onto.annotations.Slot"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Item"/>
-<fullyQualifiedTypeName name="mas.coursework_ontology.elements.SellComponents"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.OrderPair"/>
 <fullyQualifiedTypeName name="java.awt.List"/>
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="jade.lang.acl.ACLMessage"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
-<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Component"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Screen"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Battery"/>
+<fullyQualifiedTypeName name="jade.core.AID"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.HasInStock"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.SellComponents"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Component"/>
+<fullyQualifiedTypeName name="java.util.Set"/>
 </qualifiedTypeNameHistroy>

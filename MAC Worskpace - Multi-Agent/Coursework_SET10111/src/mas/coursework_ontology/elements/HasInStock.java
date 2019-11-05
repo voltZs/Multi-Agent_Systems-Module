@@ -8,6 +8,7 @@ public class HasInStock implements Predicate{
 	private AID owner;
 	private Item item;
 	private int price;
+	private int deliveryTime;
 	
 	public Item getItem() {
 		return item;
@@ -28,5 +29,11 @@ public class HasInStock implements Predicate{
 	}
 	public void setOwner(AID owner) {
 		this.owner = owner;
+	}
+	public int getDeliveryTime() {
+		return deliveryTime;
+	}
+	public void setDeliveryTime(int deliveryTime) {
+		this.deliveryTime = deliveryTime;
 	}
 }

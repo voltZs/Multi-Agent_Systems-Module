@@ -49,9 +49,9 @@ public class ManufacturerAgent extends Agent {
 	private int componentQueriesToday;
 	private int componentOrdersToday;
 	
+	private ProfitBrain profitBrain = new ProfitBrain();
 	private Warehouse warehouse = new Warehouse(5);
 	private PhoneOrdersManager phoneOrdersMngr = new PhoneOrdersManager();
-	private HashMap<String, HashMap> supplierComponentsDaily = new HashMap<>();
 
 	protected void setup() {
 		getContentManager().registerLanguage(codec);
@@ -137,7 +137,7 @@ public class ManufacturerAgent extends Agent {
 							dailyTasks.addSubBehaviour(new StockResponseListener(myAgent));
 							dailyTasks.addSubBehaviour(new OrderComponents(myAgent));
 							dailyTasks.addSubBehaviour(new OrderConfirmationListener(myAgent));
-							dailyTasks.addSubBehaviour(new Manufacture(myAgent));
+//							dailyTasks.addSubBehaviour(new Manufacture(myAgent));
 							dailyTasks.addSubBehaviour(new EndDay(myAgent));
 							myAgent.addBehaviour(dailyTasks);
 						} else if (done) {
@@ -185,17 +185,18 @@ public class ManufacturerAgent extends Agent {
 						if (action instanceof SellPhones) {
 							SellPhones order = (SellPhones) action;
 							Phone phone = order.getPhone();
-
-							// logic for accepting or rejecting order
-							// logic for accepting or rejecting order
-							// logic for accepting or rejecting order
-							// logic for accepting or rejecting order
-							// logic for accepting or rejecting order
-							// logic for accepting or rejecting order
-							// and based on that AGREE or REFUSE
-							phoneOrdersMngr.addOrder(order);
 							ACLMessage reply = msg.createReply();
-							reply.setPerformative(ACLMessage.AGREE);
+							boolean acceptOrder = profitBrain.decideOnPhoneOrder(order, phoneOrdersMngr);
+//							PROBABLY ALL LOGIC FOR MAKING DECISIONS FOR THE DAY EHRE
+//							!!!!!!!!!!!!
+//							!!!!!!!!!!!!
+//							!!!!!!!!!!!!
+							if(acceptOrder){
+								phoneOrdersMngr.addOrder(order);
+								reply.setPerformative(ACLMessage.AGREE);
+							} else {
+								reply.setPerformative(ACLMessage.REFUSE);
+							}
 							myAgent.send(reply);
 							orderCount++;
 						}
@@ -212,13 +213,17 @@ public class ManufacturerAgent extends Agent {
 		}
 
 		@Override
+		public int onEnd() {
+//			System.out.println("PENDING ORDERS -----------");
+//			System.out.println(phoneOrdersMngr.ordersToString());
+			return super.onEnd();
+		}
+
+		@Override
 		public boolean done() {
 			return orderCount == customers.size();
 		}
 	}
-
-	// LOGIC FOR FIGURING OUT WHAT NEEDS TO BE QUERIED AND ORDERED
-	// COMPONENT-WISE
 
 	public class QueryStocks extends OneShotBehaviour {
 
@@ -244,12 +249,6 @@ public class ManufacturerAgent extends Agent {
 				e.printStackTrace();
 			}
 			
-			System.out.println("I have this many suppliers: " + suppliers.size());
-			for(AID supplier : suppliers){
-				System.out.print(supplier.getLocalName()+", ");
-				System.out.println();
-			}
-			
 			for (AID supplier : suppliers) {
 				ACLMessage msg = new ACLMessage(ACLMessage.QUERY_IF);
 				msg.setLanguage(codec.getName());
@@ -258,23 +257,21 @@ public class ManufacturerAgent extends Agent {
 				msg.addReceiver(supplier);
 				
 //				Change this based on what needs queried
-				Component component = new Component();
-				component.setType("screen");
-				component.setIdentifier("5\"");
-				hasInStock.setItem((Item)component);
-				hasInStock.setOwner(supplier); // these are arbitrary but need to be filled in as predicates don't allow optional slots
-				hasInStock.setPrice(0);
-				
-				try {
-					getContentManager().fillContent(msg, hasInStock);
-				} catch(CodecException conExc){
-					conExc.printStackTrace();
-				} catch (OntologyException ontExc) {
-					ontExc.printStackTrace();
+				for(SellPhones phoneOrder : phoneOrdersMngr.getNewOrders()){
+					for (Component comp : phoneOrdersMngr.getPhoneOrderComponents(phoneOrder)){
+						hasInStock.setItem((Item)comp);
+						hasInStock.setOwner(supplier); // these are arbitrary but need to be filled in as predicates don't allow optional slots?
+						try {
+							getContentManager().fillContent(msg, hasInStock);
+						} catch(CodecException conExc){
+							conExc.printStackTrace();
+						} catch (OntologyException ontExc) {
+							ontExc.printStackTrace();
+						}
+						send(msg);
+						componentQueriesToday++;
+					}
 				}
-				
-				send(msg);
-				componentQueriesToday++;
 			}
 		}
 	}
@@ -284,7 +281,7 @@ public class ManufacturerAgent extends Agent {
 
 		public StockResponseListener(Agent a) {
 			super(a);
-			supplierComponentsDaily.clear();
+//			supplierComponentsDaily.clear();
 		}
 
 		@Override
@@ -294,7 +291,6 @@ public class ManufacturerAgent extends Agent {
 													MessageTemplate.MatchPerformative(ACLMessage.DISCONFIRM)); 
 			ACLMessage msg = receive(mt);
 			if(msg != null){
-				System.out.println("STOCKRESPONSE: " + msg.getContent());
 				if(msg.getPerformative() == ACLMessage.CONFIRM){
 					try {
 						ContentElement ce = null;
@@ -305,14 +301,7 @@ public class ManufacturerAgent extends Agent {
 							HasInStock hasInStock = (HasInStock) ce;
 							Component queriedItem = (Component) hasInStock.getItem();
 							if (queriedItem != null) {
-	//							LOGIC FOR HANDLING ITEMS THAT HAVE BEEN CONFIRMED TO BE IN STOCK
-								System.out.println(" queried item: " + queriedItem.getType() + " identif: " + queriedItem.getIdentifier() + "Sold for : " + hasInStock.getPrice());
-//								if(supplierComponentsDaily.get(queriedItem.getType()) != null &)
-//									THIS IS A SHIT APPROACH AHHHHHHHHHH
-//								HashMap<String, ArrayList> innerHashmap = new HashMap<>();
-//								ArrayList<HasInStock> availableStock
-//								innerHashmap.put(queriedItem.getIdentifier(), );
-//								supplierComponentsDaily.put(queriedItem.getType(), innerHashmap);
+								profitBrain.updateComponentMarket(hasInStock);
 							}
 						}	
 					} catch (CodecException coExc) {
@@ -322,13 +311,9 @@ public class ManufacturerAgent extends Agent {
 					}
 				} else {
 //					LOGIC FOR HANDLING ITEMS THAT HAVE BEEN DISCONFIRMED TO BE IN STOCK
-					System.out.println(" queried item not sold");
 				}
 				receivedStockResponses++;
-				System.out.println("StockResponses received: " + receivedStockResponses);
-				System.out.println("componentQueriesToday: " + componentQueriesToday);
 			} else {
-				System.out.println("Blocking StockresponnseListener");
 				block();
 			}
 		}
@@ -343,6 +328,7 @@ public class ManufacturerAgent extends Agent {
 		@Override
 		public int onEnd() {
 			reset();
+//			System.out.println(profitBrain.compMarketToString());
 			return super.onEnd();
 		}
 
@@ -352,7 +338,18 @@ public class ManufacturerAgent extends Agent {
 		}
 	}
 	
-	
+
+//	public class Manufacture extends OneShotBehaviour {
+//
+//		public Manufacture(Agent a) {
+//			super(a);
+//		}
+//
+//		@Override
+//		public void action() {
+//		}
+//
+//	}
 
 	public class OrderComponents extends OneShotBehaviour {
 		
@@ -364,41 +361,35 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			componentOrdersToday = 0;
 			
-//			ENCLOSE IN FOR LOOP - separate orders FOR EACH SUPPLIER
-//			example order ordering
-			AID supplier = suppliers.get(0);
-			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-			msg.setLanguage(codec.getName());
-			msg.setOntology(ontology.getName());
-			msg.addReceiver(supplier);
-
 			// Change this based on what needs to be ordered
-			SellComponents sellComponents = new SellComponents();
-			ArrayList<OrderPair> orderPairs =  new ArrayList<>();
-			OrderPair compPair = new OrderPair();
-			Component component = new Component();
-			component.setType("screen");
-			component.setIdentifier("5\"");
-			compPair.setOrderedItem(component);
-			compPair.setQuantity(2);
-			orderPairs.add(compPair);
-			sellComponents.setBuyer(myAgent.getAID());
-			sellComponents.setOrderPairs(orderPairs);
+			ArrayList<SellComponents> todaysOrders = profitBrain.decideWhatToOrder(warehouse, phoneOrdersMngr);
+			System.out.println("Was told to order: " + todaysOrders);
 			
-			Action request = new Action();
-			request.setAction(sellComponents);
-			request.setActor(supplier); 
-			
-			try {
-				getContentManager().fillContent(msg, request);
-			} catch (CodecException conExc) {
-				conExc.printStackTrace();
-			} catch (OntologyException ontExc) {
-				ontExc.printStackTrace();
-			}
-			
-			send(msg);
-			componentOrdersToday++;
+			for(SellComponents order : todaysOrders){
+//				THIS NEEDS TO BBE REMOVED WHEN PROFITBRAIN IMPLEMENTS SETTING SUPPLIER BY THE compMarket 
+//				AND THE REST OF REFERENCES TO SUPPLIER NEED TO BE REPLACED BY CHECKING WHAT THE SUPPLIER IN THE ORDER IS
+				AID supplier = new AID("supplier1", AID.ISLOCALNAME);
+				order.setSeller(supplier);
+				order.setBuyer(myAgent.getAID());
+				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+				msg.setLanguage(codec.getName());
+				msg.setOntology(ontology.getName());
+				msg.addReceiver(supplier);
+				
+				Action request = new Action();
+				request.setAction(order);
+				request.setActor(supplier); 
+				try {
+					getContentManager().fillContent(msg, request);
+				} catch (CodecException conExc) {
+					conExc.printStackTrace();
+				} catch (OntologyException ontExc) {
+					ontExc.printStackTrace();
+				}
+				send(msg);
+				System.out.println("So I ordered "+ order.getOrderPairs());
+				componentOrdersToday++;
+			}	
 		}
 	}
 
@@ -416,18 +407,30 @@ public class ManufacturerAgent extends Agent {
 													MessageTemplate.MatchPerformative(ACLMessage.REFUSE)); 
 			ACLMessage msg = receive(mt);
 			if(msg != null){
-				System.out.println("ORDERRESPONSE: " + msg.getContent());
 				if(msg.getPerformative() == ACLMessage.AGREE){
-					
+					try {
+						ContentElement ce = null;
+						// Let JADE convert from String to Java objects
+						// Output will be a ContentElements
+						ce = getContentManager().extractContent(msg);
+						if (ce instanceof Action) {
+							Concept action = ((Action) ce).getAction();
+							if(action instanceof SellComponents){
+								SellComponents confirmedOrder = (SellComponents) action;
+								System.out.println("Order confirmation received.");
+								warehouse.receiveComponents(confirmedOrder);
+							}
+						}
+					} catch (CodecException coExc) {
+						coExc.printStackTrace();
+					} catch (OntologyException onExc) {
+						onExc.printStackTrace();
+					}
 				} else {
 //					LOGIC FOR HANDLING ITEMS THAT HAVE BEEN DISCONFIRMED TO BE IN STOCK
-					System.out.println("Order did not go through");
 				}
 				receivedOrderResponses++;
-				System.out.println("Order Responses received: " + receivedOrderResponses);
-				System.out.println("componentOrdersToday: " + componentOrdersToday);
 			} else {
-				System.out.println("Blocking OrderConfirmationListener");
 				block();
 			}
 		}
@@ -453,20 +456,6 @@ public class ManufacturerAgent extends Agent {
 
 	}
 
-	public class Manufacture extends OneShotBehaviour {
-
-		public Manufacture(Agent a) {
-			super(a);
-		}
-
-		@Override
-		public void action() {
-			// TODO Auto-generated method stub
-
-		}
-
-	}
-
 	public class EndDay extends OneShotBehaviour {
 
 		public EndDay(Agent a) {
@@ -475,12 +464,9 @@ public class ManufacturerAgent extends Agent {
 
 		@Override
 		public void action() {
-//			CALCULATE DAILY PROFIT 
-//			Double todaysProfit = TotalValueOfOrdersShipped() 
-//						- phoneOrdersMngr.calculateLateOrders() 
-//						- warehouse.calculateStorageCharge() 
-//						- SuppliesPurchased();
-			
+			System.out.println(warehouse.toString());
+			profitBrain.todaysProfit(warehouse, phoneOrdersMngr);
+			System.out.println(profitBrain.getDailyProfits());
 //			Increment values for the next day
 			warehouse.incrementNewDay();
 			phoneOrdersMngr.incrementNewDay();

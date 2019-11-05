@@ -22,13 +22,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import mas.coursework.ManufacturerAgent.EndDay;
-import mas.coursework.ManufacturerAgent.Manufacture;
-import mas.coursework.ManufacturerAgent.OrderComponents;
-import mas.coursework.ManufacturerAgent.OrderConfirmationListener;
-import mas.coursework.ManufacturerAgent.PhoneOrdersListener;
-import mas.coursework.ManufacturerAgent.QueryStocks;
-import mas.coursework.ManufacturerAgent.StockResponseListener;
 import mas.coursework_ontology.SupplyChainOntology;
 import mas.coursework_ontology.elements.*;
 
@@ -40,16 +33,16 @@ public class SupplierAgent extends Agent{
 	private AID tickerAgent;
 	private AID manufacturerAgent;
 	private int agentType;
+	private int deliveryTime;
 	SupplierCatalogue catalogue;
 	
 	protected void setup(){
 //		get arguments passed in when creating agent
 		Object[] args = this.getArguments();
 		agentType = (int) args[0];
+		deliveryTime = (int) ((Math.pow(agentType,2))*(-1));
 		int wait = (int)(Math.random()*1000);
 		doWait(wait);
-		System.out.println("Supplier type: " + agentType);
-		
 		catalogue = new SupplierCatalogue(agentType);
 		catalogue.printCalatogue();
 		getContentManager().registerLanguage(codec);
@@ -174,7 +167,6 @@ public class SupplierAgent extends Agent{
 			if(msg != null){
 				try {
 					ContentElement ce = null;
-					System.out.println("SUPPLIER STOCKCHECK "+msg.getContent()); 
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElements
 					ce = getContentManager().extractContent(msg);
@@ -191,6 +183,7 @@ public class SupplierAgent extends Agent{
 //								set self as owner so the receiver knows which seller this is about directly from the content field 
 								confirmation.setOwner(getAID());
 								confirmation.setPrice(result);
+								confirmation.setDeliveryTime(deliveryTime);
 								try {
 									 // Let JADE convert from Java objects to string
 									 getContentManager().fillContent(reply, confirmation);
@@ -237,7 +230,6 @@ public class SupplierAgent extends Agent{
 			if(msg != null){
 				try {
 					ContentElement ce = null;
-					System.out.println("SUPPLIER ORDERRECEIVED "+msg.getContent()); 
 					// Let JADE convert from String to Java objects
 					// Output will be a ContentElements
 					ce = getContentManager().extractContent(msg);
@@ -246,16 +238,30 @@ public class SupplierAgent extends Agent{
 						if(action instanceof SellComponents){
 							ACLMessage reply = msg.createReply();
 							reply.setPerformative(ACLMessage.AGREE);
-							SellComponents orderAction = (SellComponents) action;
-							ArrayList<OrderPair> order = (ArrayList<OrderPair>) orderAction.getOrderPairs();
-							AID buyer = orderAction.getBuyer();
+							SellComponents order = (SellComponents) action;
+							order.setDeliveryTime(deliveryTime);
+							ArrayList<OrderPair> orderList = (ArrayList<OrderPair>) order.getOrderPairs();
 							boolean allInStock = true;
-							for (OrderPair pair : order){
+							for (OrderPair pair : orderList){
 								Component orderedComponent = (Component) pair.getOrderedItem();
 								if(catalogue.checkIfSold(orderedComponent.getType(), orderedComponent.getIdentifier()) <= 0){
 									allInStock = false;
 									reply.setPerformative(ACLMessage.REFUSE);
 									break;
+								}
+							}
+							if(allInStock){
+								Action request = new Action();
+								request.setAction(order);
+								request.setActor(getAID()); 
+								try {
+									// Let JADE convert from Java objects to string
+									getContentManager().fillContent(reply, request); 
+									send(reply);
+								} catch (CodecException cExc) {
+									cExc.printStackTrace();
+								} catch (OntologyException oExc) {
+									oExc.printStackTrace();
 								}
 							}
 							send(reply);
