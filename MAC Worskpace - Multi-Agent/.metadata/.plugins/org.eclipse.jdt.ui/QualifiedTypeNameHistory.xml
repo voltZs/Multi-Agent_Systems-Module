@@ -22,7 +22,6 @@
 <fullyQualifiedTypeName name="java.awt.Component"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Phablet"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.SellPhones"/>
-<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Phone"/>
 <fullyQualifiedTypeName name="jade.lang.acl.MessageTemplate"/>
 <fullyQualifiedTypeName name="jade.core.behaviours.Behaviour"/>
 <fullyQualifiedTypeName name="jade.content.onto.OntologyException"/>
@@ -38,11 +37,13 @@
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Screen"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Battery"/>
-<fullyQualifiedTypeName name="jade.core.AID"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.HasInStock"/>
 <fullyQualifiedTypeName name="java.lang.System"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.SellComponents"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Component"/>
 <fullyQualifiedTypeName name="java.util.Set"/>
+<fullyQualifiedTypeName name="jade.util.leap.Serializable"/>
+<fullyQualifiedTypeName name="jade.core.AID"/>
+<fullyQualifiedTypeName name="mas.coursework_ontology.elements.Phone"/>
 </qualifiedTypeNameHistroy>

@@ -15,17 +15,26 @@ import mas.coursework_ontology.elements.SellPhones;
 public class ProfitBrain {
 	private ArrayList<Double> dailyProfits;
 	private HashMap<String, HashMap<String, ArrayList<BuyingOption>>> componentMarket = new HashMap<>();
+	private ArrayList<SellPhones> shippedToday;
 	
 	public ProfitBrain(){
 		dailyProfits = new ArrayList<>();
 		componentMarket = new HashMap<>();
+		shippedToday  = new ArrayList<>();
 	}
 	
 	/*
 	 * Returns boolean - whether order is perceived to increase profit
 	 */
-	public boolean decideOnPhoneOrder(SellPhones order, PhoneOrdersManager manager) {
-		return true;
+	public ArrayList<SellPhones> decideOnPhoneOrders(PhoneOrdersManager phoneOrdersMngr, Warehouse warehouse) {
+//		LOGIC FOR DECIDING WHAT PHONE ORDERS TO ACCEPT - right now accepting everything
+		ArrayList<SellPhones>  acceptedOrders = new ArrayList<>();
+		ArrayList<SellPhones> receivedOrders = phoneOrdersMngr.getNewOrders();
+		for(SellPhones order : receivedOrders){
+			acceptedOrders.add(order);
+		}
+		
+		return acceptedOrders;
 	}
 	
 	/*
@@ -60,16 +69,31 @@ public class ProfitBrain {
 	 * returns an array of PhoneOrders to sell
 	 */
 	public ArrayList<SellPhones> decideWhatToShip(Warehouse warehouse, PhoneOrdersManager phoneOrdersMngr){
-		ArrayList<SellPhones> toBeShipped = new ArrayList<>();
-//		CHANGE THIS - RIGHT NOW SHIPPING FIRST X ORDERS THAT CAN BE SHIPPED (all components in stock)!
-//		
-//		
-		return toBeShipped;
+//		CHANGE THIS - RIGHT NOW SHIPPING ONEfirst order that can be sold
+		HashMap<SellPhones, Double> urgencymatrix = phoneOrdersMngr.generateUrgencyMatrix();
+		int phonesSold = 0;
+//		Warehouse warehouseCopy = (Warehouse) warehouse.cloneWarehouse();
+		for(SellPhones phoneOrder : urgencymatrix.keySet()){
+//			warehouseCopy.phoneOrder.
+			boolean enoughStock = true;
+			for(Component comp : phoneOrdersMngr.getPhoneOrderComponents(phoneOrder)){
+				if(warehouse.checkStock(comp.getType(), comp.getIdentifier()) < phoneOrder.getQuantity()){
+					enoughStock = false;
+					break;
+				}
+			}
+			if(enoughStock){
+				shippedToday.add(phoneOrder);
+				break;
+			}
+		}
+		return shippedToday;
 	}
 	
 	/*
 	 * Calculates this day's profit based on Total shipped orders' value minus charges for late orders
 	 * minus storage charges in warehouse minus value of purchased components
+	 * and then resets shipped orders 
 	 */
 	public void todaysProfit(Warehouse warehouse, PhoneOrdersManager phoneOrdersMngr) {
 		Double totalOrdersShipped = totalValueOfOrdersShipped();
@@ -83,6 +107,7 @@ public class ProfitBrain {
 		Double todaysProfit = totalOrdersShipped - lateOrderCharges -storageCharges - componentPurchases;
 		
 		dailyProfits.add(todaysProfit);
+		shippedToday.clear();
 	}
 	
 	/*
@@ -92,8 +117,16 @@ public class ProfitBrain {
 		return dailyProfits;
 	}
 	
+	public ArrayList<SellPhones> getShippedToday(){
+		return shippedToday;
+	}
+	
 	private Double totalValueOfOrdersShipped() {
-		return 0.0;
+		Double sum = 0.0;
+		for(SellPhones shipped : shippedToday){
+			sum += shipped.getUnitPrice() * shipped.getQuantity();
+		}
+		return sum;
 	}
 
 	private Double componentPurchaseValue(ArrayList<SellComponents> todaysPurchases) {

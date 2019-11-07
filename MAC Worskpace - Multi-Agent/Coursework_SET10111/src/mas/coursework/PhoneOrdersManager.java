@@ -11,12 +11,14 @@ import mas.coursework_ontology.elements.SellPhones;
 public class PhoneOrdersManager {
 
 	private HashMap<SellPhones, Integer> phoneOrders;
+	private ArrayList<SellPhones> phoneOrdersToday;
 	
 	public PhoneOrdersManager(){
 		phoneOrders = new HashMap<>();
+		phoneOrdersToday = new ArrayList<>();
 	}
 	
-	public void addOrder(SellPhones order){
+	public void acceptOrder(SellPhones order){
 		phoneOrders.put(order, 0);
 	}
 
@@ -71,10 +73,6 @@ public class PhoneOrdersManager {
 		result += "\t\tstorage: " + order.getPhone().getStorage() + "\n";
 		return result;
 	}
-
-	public Double calculateUrgency(SellPhones order){
-		return 1.0;
-	}
 	
 	public int calculatePenalty(SellPhones order){
 		int result = (phoneOrders.get(order) - order.getDaysDue()) +1;
@@ -86,9 +84,13 @@ public class PhoneOrdersManager {
 		return result;
 	}
 	
-	public HashMap<SellPhones, Double> generateUrgencyMatrix(ArrayList<SellPhones> orders){
+	public Double calculateUrgency(SellPhones order){
+		return 1.0;
+	}
+	
+	public HashMap<SellPhones, Double> generateUrgencyMatrix(){
 		HashMap<SellPhones, Double> matrix = new HashMap<>();
-		for(SellPhones order : orders){
+		for(SellPhones order : phoneOrders.keySet()){
 			matrix.put(order, calculateUrgency(order));
 		}
 		return matrix;
@@ -101,19 +103,20 @@ public class PhoneOrdersManager {
 	}
 
 	public ArrayList<SellPhones> getNewOrders() {
-		ArrayList<SellPhones> newOrders = new ArrayList<>();
-		for(SellPhones order : phoneOrders.keySet()){
-			if(phoneOrders.get(order) == 0){
-				newOrders.add(order);
-			}
-		}
-		return newOrders;
+//		ArrayList<SellPhones> newOrders = new ArrayList<>();
+//		for(SellPhones order : phoneOrders.keySet()){
+//			if(phoneOrders.get(order) == 0){
+//				newOrders.add(order);
+//			}
+//		}
+//		return newOrders;
+		return phoneOrdersToday;
 	}
 	
 	/*
 	 * Takes a SellPhones object (order) and returns it's components in an arraylist
 	 */
-	public ArrayList<Component> getPhoneOrderComponents(SellPhones order){
+	public static ArrayList<Component> getPhoneOrderComponents(SellPhones order){
 		ArrayList<Component> components = new ArrayList<>();
 		try {
 			components.add(order.getPhone().getScreen());
@@ -124,6 +127,14 @@ public class PhoneOrdersManager {
 			e.printStackTrace();
 		}
 		return components;
+	}
+
+	public void phoneOrderReceived(SellPhones order) {
+		phoneOrdersToday.add(order);
+	}
+
+	public void clearTodaysOrders() {
+		phoneOrdersToday.clear();
 	}
 
 }

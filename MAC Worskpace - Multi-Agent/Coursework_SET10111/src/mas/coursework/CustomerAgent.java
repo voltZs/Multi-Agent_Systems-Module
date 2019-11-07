@@ -131,6 +131,7 @@ public class CustomerAgent extends Agent{
 			msg.setOntology(ontology.getName());
 			PhoneOrderGenerator generator = new PhoneOrderGenerator();
 			SellPhones order = generator.getOrder();
+			order.setBuyer(getAID());
 			Action request = new Action();
 			request.setAction(order);
 			request.setActor(manufacturerAgent); 

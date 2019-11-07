@@ -2,9 +2,11 @@ package mas.coursework_ontology.elements;
 
 import jade.content.AgentAction;
 import jade.content.onto.annotations.Slot;
+import jade.core.AID;
 
 public class SellPhones implements AgentAction {
 	Phone phone;
+	AID buyer;
 	int quantity;
 	int unitPrice;
 	int daysDue;
@@ -16,6 +18,14 @@ public class SellPhones implements AgentAction {
 	}
 	public void setPhone(Phone phone) {
 		this.phone = phone;
+	}
+	
+	@Slot(mandatory = true)
+	public AID getBuyer() {
+		return buyer;
+	}
+	public void setBuyer(AID buyer) {
+		this.buyer = buyer;
 	}
 	
 	@Slot(mandatory = true)

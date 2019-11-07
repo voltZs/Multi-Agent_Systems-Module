@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import jade.util.leap.Serializable;
 import mas.coursework_ontology.elements.Component;
 import mas.coursework_ontology.elements.OrderPair;
+import mas.coursework_ontology.elements.Phone;
 import mas.coursework_ontology.elements.SellComponents;
+import mas.coursework_ontology.elements.SellPhones;
 
 public class Warehouse {
-	int dailyCharge;
-	HashMap<String, WarehouseSection> sections;
-	ArrayList<SellComponents> purchasedToday;
-	ArrayList<ExpectedDelivery> expectedDeliveries;
+	private int dailyCharge;
+	private HashMap<String, WarehouseSection> sections;
+	private ArrayList<SellComponents> purchasedToday;
+	private ArrayList<ExpectedDelivery> expectedDeliveries;
 
 	public Warehouse(int dailyCharge) {
 		this.dailyCharge = dailyCharge;
@@ -22,6 +25,14 @@ public class Warehouse {
 		expectedDeliveries = new ArrayList();
 	}
 
+//	copy constructor
+	public Warehouse(Warehouse wrhs){
+		this.dailyCharge = wrhs.dailyCharge;
+		this.sections = wrhs.sections;
+		this.purchasedToday = wrhs.purchasedToday;
+		this.expectedDeliveries = wrhs.expectedDeliveries;
+	}
+	
 	public Double calculateStorageCharge() {
 		Double charge = 0.0;
 		for (String sectionType : sections.keySet()) {
@@ -37,7 +48,7 @@ public class Warehouse {
 		int amount = 0;
 		WarehouseSection section = sections.get(type);
 		if (section != null) {
-			amount += section.checkSectionStock(identifier);
+			amount = section.checkSectionStock(identifier);
 		}
 		return amount;
 	}
@@ -96,13 +107,52 @@ public class Warehouse {
 	public ArrayList<SellComponents> getTodaysPurchases() {
 		return purchasedToday;
 	}
+	
+	/*
+	 * Removes the components needed for the phone order from the warehouse
+	 */
+	public void assembleOrder(SellPhones shippedOrder) {
+		int quantity = shippedOrder.getQuantity();
+		ArrayList<Component> comps = PhoneOrdersManager.getPhoneOrderComponents(shippedOrder);
+		for(Component comp : comps){
+			removeFromWarehouse(comp, quantity);
+		}
+	}
+	
+	private void removeFromWarehouse(Component comp, int quantity) {
+		sections.get(comp.getType()).removeFromSection(comp, quantity);
+	}
+
+	public void burnDown(){
+		for(String type : sections.keySet()){
+			sections.get(type).burnDown();
+		}
+	}
+	
+	public Warehouse cloneWarehouse(){
+		Warehouse newWarehouse = new Warehouse(dailyCharge);
+		for(String type : sections.keySet()){
+			for(String identifier : sections.get(type).aisles.keySet()){
+				Component comp = sections.get(type).aisles.get(identifier).component;
+				int amnt = sections.get(type).aisles.get(identifier).amount;
+				newWarehouse.addToWarehouse(comp);
+				newWarehouse.sections.get(type).aisles.get(identifier).amount = amnt;
+			}
+		}
+		return newWarehouse;
+	}
+
 
 	// INNER CLASS ======================================
-	private class WarehouseSection {
+	private class WarehouseSection{
 		HashMap<String, Aisle> aisles;
 
 		public WarehouseSection() {
 			aisles = new HashMap<>();
+		}
+
+		public void removeFromSection(Component comp, int quantity) {
+			aisles.get(comp.getIdentifier()).removeFromAisle(comp, quantity);
 		}
 
 		public Double sumSectionCharges() {
@@ -139,15 +189,29 @@ public class Warehouse {
 			}
 			return result;
 		}
+		
+		public void burnDown() {
+			for (String identif : aisles.keySet()) {
+				aisles.get(identif).burnDown();
+			}
+		}
+
 
 		// INNER INNER CLASS ======================================
-		private class Aisle {
+		private class Aisle{
 			Component component;
 			int amount;
 
 			public Aisle() {
 				component = null;
 				amount = 0;
+			}
+
+			public void removeFromAisle(Component comp, int quantity) {
+				amount -= quantity;
+				if(amount == 0){
+					component = null;
+				}
 			}
 
 			public int sumAisleCharges() {
@@ -172,6 +236,11 @@ public class Warehouse {
 					result += "\t\t-Amount: " + amount + "\n";
 				}
 				return result;
+			}
+			
+			public void burnDown() {
+				amount = 0;
+				component = null;
 			}
 		}
 	}

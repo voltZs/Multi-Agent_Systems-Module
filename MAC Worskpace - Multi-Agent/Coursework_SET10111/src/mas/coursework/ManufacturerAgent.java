@@ -137,7 +137,8 @@ public class ManufacturerAgent extends Agent {
 							dailyTasks.addSubBehaviour(new StockResponseListener(myAgent));
 							dailyTasks.addSubBehaviour(new OrderComponents(myAgent));
 							dailyTasks.addSubBehaviour(new OrderConfirmationListener(myAgent));
-//							dailyTasks.addSubBehaviour(new Manufacture(myAgent));
+							dailyTasks.addSubBehaviour(new RespondToPhoneOrders(myAgent));
+							dailyTasks.addSubBehaviour(new ShipOrders(myAgent));
 							dailyTasks.addSubBehaviour(new EndDay(myAgent));
 							myAgent.addBehaviour(dailyTasks);
 						} else if (done) {
@@ -184,20 +185,7 @@ public class ManufacturerAgent extends Agent {
 						Concept action = ((Action) ce).getAction();
 						if (action instanceof SellPhones) {
 							SellPhones order = (SellPhones) action;
-							Phone phone = order.getPhone();
-							ACLMessage reply = msg.createReply();
-							boolean acceptOrder = profitBrain.decideOnPhoneOrder(order, phoneOrdersMngr);
-//							PROBABLY ALL LOGIC FOR MAKING DECISIONS FOR THE DAY EHRE
-//							!!!!!!!!!!!!
-//							!!!!!!!!!!!!
-//							!!!!!!!!!!!!
-							if(acceptOrder){
-								phoneOrdersMngr.addOrder(order);
-								reply.setPerformative(ACLMessage.AGREE);
-							} else {
-								reply.setPerformative(ACLMessage.REFUSE);
-							}
-							myAgent.send(reply);
+							phoneOrdersMngr.phoneOrderReceived(order);
 							orderCount++;
 						}
 					}
@@ -338,6 +326,37 @@ public class ManufacturerAgent extends Agent {
 		}
 	}
 	
+	public class RespondToPhoneOrders extends OneShotBehaviour {
+
+		public RespondToPhoneOrders(Agent a) {
+			super(a);
+		}
+
+		@Override
+		public void action() {
+//			DECIDE ON PHONE ORDERS
+			ArrayList<SellPhones> acceptedOrders = profitBrain.decideOnPhoneOrders(phoneOrdersMngr, warehouse);
+			for(SellPhones orderedToday : phoneOrdersMngr.getNewOrders()){
+				ACLMessage msg = null; 
+				if(acceptedOrders.indexOf(orderedToday) == -1){
+//					if the order was not accepted
+					msg = new ACLMessage(ACLMessage.REFUSE);					
+				} else {
+					msg = new ACLMessage(ACLMessage.AGREE);
+//					also after decision made add successful orders to pendingphoneOrders
+					phoneOrdersMngr.acceptOrder(orderedToday);
+				}
+				msg.addReceiver(orderedToday.getBuyer());
+				send(msg);
+			}
+			
+//			And  empty todays orders as we are done with them
+			phoneOrdersMngr.clearTodaysOrders();
+			
+		}
+		
+	}
+	
 
 //	public class Manufacture extends OneShotBehaviour {
 //
@@ -361,7 +380,7 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			componentOrdersToday = 0;
 			
-			// Change this based on what needs to be ordered
+//			DECIDE WHAT TO ORDER
 			ArrayList<SellComponents> todaysOrders = profitBrain.decideWhatToOrder(warehouse, phoneOrdersMngr);
 			System.out.println("Was told to order: " + todaysOrders);
 			
@@ -454,6 +473,25 @@ public class ManufacturerAgent extends Agent {
 			return receivedOrderResponses == componentOrdersToday ;
 		}
 
+	}
+	
+	public class ShipOrders extends OneShotBehaviour{
+		
+		public ShipOrders(Agent a) {
+			super(a);
+		}
+
+		@Override
+		public void action() {
+//			MANUFACTURE AND SHIP!
+			ArrayList<SellPhones> toBeShipped = profitBrain.decideWhatToShip(warehouse, phoneOrdersMngr);
+			System.out.println("Today shipping:" + toBeShipped);
+			
+//			Remove number of shipped components from the warehouse
+			for(SellPhones shippedOrder : profitBrain.getShippedToday()){
+				warehouse.assembleOrder(shippedOrder);
+			}
+		}
 	}
 
 	public class EndDay extends OneShotBehaviour {

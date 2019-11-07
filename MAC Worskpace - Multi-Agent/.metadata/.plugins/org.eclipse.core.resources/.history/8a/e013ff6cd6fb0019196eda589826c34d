@@ -1,7 +1,0 @@
-package mas.coursework_ontology.elements;
-
-import jade.content.Predicate;
-
-public class StockConfirmation implements Predicate{
-	
-}
