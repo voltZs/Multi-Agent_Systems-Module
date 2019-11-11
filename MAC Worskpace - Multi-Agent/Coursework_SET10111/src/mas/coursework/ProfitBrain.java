@@ -9,6 +9,7 @@ import jade.core.AID;
 import mas.coursework_ontology.elements.Component;
 import mas.coursework_ontology.elements.HasInStock;
 import mas.coursework_ontology.elements.OrderPair;
+import mas.coursework_ontology.elements.Phone;
 import mas.coursework_ontology.elements.SellComponents;
 import mas.coursework_ontology.elements.SellPhones;
 
@@ -69,27 +70,116 @@ public class ProfitBrain {
 	 * returns an array of PhoneOrders to sell
 	 */
 	public ArrayList<SellPhones> decideWhatToShip(Warehouse warehouse, PhoneOrdersManager phoneOrdersMngr){
-//		CHANGE THIS - RIGHT NOW SHIPPING ONEfirst order that can be sold
-		HashMap<SellPhones, Double> urgencymatrix = phoneOrdersMngr.generateUrgencyMatrix();
-		int phonesSold = 0;
-//		Warehouse warehouseCopy = (Warehouse) warehouse.cloneWarehouse();
-		for(SellPhones phoneOrder : urgencymatrix.keySet()){
-//			warehouseCopy.phoneOrder.
-			boolean enoughStock = true;
-			for(Component comp : phoneOrdersMngr.getPhoneOrderComponents(phoneOrder)){
-				if(warehouse.checkStock(comp.getType(), comp.getIdentifier()) < phoneOrder.getQuantity()){
-					enoughStock = false;
-					break;
-				}
+		HashMap<SellPhones, Double> urgencyMatrix = new HashMap(); ;
+		
+//		CREATE A SHIPPING URGENCY MATRIX BUT ONLY DEAL WITH ONES WE HAVE ENOUGH COMPONENTS IN STOCK FOR
+		HashMap<SellPhones, Double> temp = phoneOrdersUrgencyMatrix(phoneOrdersMngr.getPhoneOrdersMatrix());
+		for(SellPhones order : temp.keySet()){
+			if (warehouse.checkStockForOrder(order)){
+				urgencyMatrix.put(order, temp.get(order));
 			}
-			if(enoughStock){
-				shippedToday.add(phoneOrder);
+		}
+//		RETURN IF THERE'S NOTHING TO SHIP
+		if(urgencyMatrix.isEmpty()){
+			return shippedToday;
+		}
+		
+		Warehouse warehouseCopy = (Warehouse) warehouse.cloneWarehouse();
+		int phonesChosen = 0;
+		while(true){
+			Double urgency = 0.0;
+			SellPhones mostUrgent = null;
+			System.out.println("Valid orders: "+ urgencyMatrix.size());
+			for(SellPhones phoneOrder : urgencyMatrix.keySet()){
+//				System.out.println("Order: " + phoneOrder);
+//				System.out.println(urgencyMatrix.get(phoneOrder));
+				if(urgencyMatrix.get(phoneOrder) >= urgency){
+					urgency = urgencyMatrix.get(phoneOrder) ;
+					mostUrgent = phoneOrder;
+				}
+//				System.out.println("Inloop decision: " + mostUrgent);
+			}
+//			System.out.println("Most urgent now is: " + mostUrgent);
+			
+			boolean underFiftyLimit = phonesChosen + mostUrgent.getQuantity() <= 50;
+			boolean enoughStock = warehouseCopy.checkStockForOrder(mostUrgent);
+			if(underFiftyLimit && enoughStock){
+				System.out.println("Adding to shipping" + mostUrgent + " with urgency " + urgencyMatrix.get(mostUrgent));
+				shippedToday.add(mostUrgent);
+				urgencyMatrix.remove(mostUrgent);
+				phonesChosen += mostUrgent.getQuantity();
+				warehouseCopy.assembleOrder(mostUrgent);
+			} else {
+				System.out.println("underfiftylimit: " +underFiftyLimit + " enoughstock: " + enoughStock);
+				urgencyMatrix.remove(mostUrgent);
+			}
+			if(urgencyMatrix.size() == 0 || phonesChosen == 50){
+				System.out.println("Matrix size: " + urgencyMatrix.size() + " phones chosen: "+ phonesChosen);
 				break;
 			}
 		}
 		return shippedToday;
 	}
 	
+	private HashMap<SellPhones, Double> phoneOrdersUrgencyMatrix(HashMap<SellPhones, Integer> ordersMatrix) {
+		HashMap<SellPhones, Double> urgencyMatrix = new HashMap();
+		
+		HashMap<SellPhones, Integer> idealProfitMatrix = new HashMap();
+		int minProfit = 0;
+		int maxProfit = 0;
+		boolean initialised = false;
+		for(SellPhones order : ordersMatrix.keySet()){
+			int idealProfit = (order.getUnitPrice()*order.getQuantity()) - estimateAssemblyPrice(order);		
+			idealProfitMatrix.put(order, idealProfit);
+			if(idealProfit< minProfit || !initialised){
+				minProfit = idealProfit;
+				initialised = true;
+			}
+			if(idealProfit> maxProfit){
+				maxProfit = idealProfit;
+			}
+		}
+		System.out.println("MIN: " + minProfit + " MAX: " + maxProfit);
+		for(SellPhones order : ordersMatrix.keySet()){
+			int idealProfit = idealProfitMatrix.get(order);
+			Double penaltyProportion = (double)order.getPerDayPenalty() / (double)idealProfit;
+			Double overdueUrgency = mapOverdueUrgency((double)ordersMatrix.get(order));
+//			mapping (min,max) to (0,1)
+			Double orderImportance =((double)idealProfit-minProfit)/(maxProfit-minProfit);
+			
+			Double shipmentUrgency = orderImportance * (1 + (penaltyProportion * overdueUrgency));
+			urgencyMatrix.put(order, shipmentUrgency);
+			
+			System.out.println("idProfit: " + idealProfit + "\tdailyPen:" + order.getPerDayPenalty() + "\toverdue: " + ordersMatrix.get(order) );
+			System.out.println(orderImportance + " * (1+ " + penaltyProportion + " * " + overdueUrgency + ") = " + shipmentUrgency);
+		}
+		return urgencyMatrix;
+	}
+
+	private int estimateAssemblyPrice(SellPhones order) {
+		ArrayList<Component> phoneComponents = PhoneOrdersManager.getPhoneOrderComponents(order);
+		int total = 0;
+		for(Component comp : phoneComponents){
+			int maxPrice = 0;
+			for(BuyingOption opt : getComponentBuyingOptions(comp)){
+				if(opt.price>maxPrice){
+					maxPrice = opt.price;
+				}
+			}
+			total += maxPrice;
+		}
+		total *= order.getQuantity();
+		return 0;
+	}
+	
+	public Double mapOverdueUrgency(Double daysOverdue){
+		if(daysOverdue < 0){
+			return (daysOverdue+10)/10;
+		} else {
+			return (daysOverdue +1) ;
+		}
+	}
+
 	/*
 	 * Calculates this day's profit based on Total shipped orders' value minus charges for late orders
 	 * minus storage charges in warehouse minus value of purchased components
@@ -181,6 +271,10 @@ public class ProfitBrain {
 			}
 			optionsByIdent.add(option);
 		}
+	}
+	
+	private ArrayList<BuyingOption> getComponentBuyingOptions(Component comp) {
+		return componentMarket.get(comp.getType()).get(comp.getIdentifier());
 	}
 	
 	public String compMarketToString(){

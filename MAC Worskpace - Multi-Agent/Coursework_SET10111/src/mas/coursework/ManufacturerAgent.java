@@ -504,7 +504,14 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			System.out.println(warehouse.toString());
 			profitBrain.todaysProfit(warehouse, phoneOrdersMngr);
-			System.out.println(profitBrain.getDailyProfits());
+			
+			ArrayList<Double> dailyProfits = profitBrain.getDailyProfits();
+			System.out.println(dailyProfits);
+			int totalProfit = 0;
+			for(Double num : dailyProfits){
+				totalProfit += num;
+			}
+			System.out.println("Total profits so far: "+ totalProfit);
 //			Increment values for the next day
 			warehouse.incrementNewDay();
 			phoneOrdersMngr.incrementNewDay();

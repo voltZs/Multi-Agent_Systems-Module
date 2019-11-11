@@ -88,14 +88,6 @@ public class PhoneOrdersManager {
 		return 1.0;
 	}
 	
-	public HashMap<SellPhones, Double> generateUrgencyMatrix(){
-		HashMap<SellPhones, Double> matrix = new HashMap<>();
-		for(SellPhones order : phoneOrders.keySet()){
-			matrix.put(order, calculateUrgency(order));
-		}
-		return matrix;
-	}
-	
 	public void matrixToString(HashMap<SellPhones, Double> matrix){
 		for(SellPhones order : matrix.keySet()){
 			System.out.println("\t"+ order + " - urgency: " + matrix.get(order));
@@ -103,14 +95,11 @@ public class PhoneOrdersManager {
 	}
 
 	public ArrayList<SellPhones> getNewOrders() {
-//		ArrayList<SellPhones> newOrders = new ArrayList<>();
-//		for(SellPhones order : phoneOrders.keySet()){
-//			if(phoneOrders.get(order) == 0){
-//				newOrders.add(order);
-//			}
-//		}
-//		return newOrders;
 		return phoneOrdersToday;
+	}
+	
+	public HashMap<SellPhones, Integer> getPhoneOrdersMatrix(){
+		return phoneOrders;
 	}
 	
 	/*

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import jade.util.leap.Serializable;
+import mas.coursework.PhoneOrdersManager;
 import mas.coursework_ontology.elements.Component;
 import mas.coursework_ontology.elements.OrderPair;
 import mas.coursework_ontology.elements.Phone;
@@ -40,7 +41,16 @@ public class Warehouse {
 		}
 		return charge;
 	}
-
+	
+	public boolean checkStockForOrder(SellPhones order){
+		for(Component comp : PhoneOrdersManager.getPhoneOrderComponents(order)){
+			if(checkStock(comp.getType(), comp.getIdentifier()) < order.getQuantity()){
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/*
 	 * Return the amount of items with specs in stock
 	 */
@@ -135,8 +145,10 @@ public class Warehouse {
 			for(String identifier : sections.get(type).aisles.keySet()){
 				Component comp = sections.get(type).aisles.get(identifier).component;
 				int amnt = sections.get(type).aisles.get(identifier).amount;
-				newWarehouse.addToWarehouse(comp);
-				newWarehouse.sections.get(type).aisles.get(identifier).amount = amnt;
+				if(comp != null && amnt > 0){
+					newWarehouse.addToWarehouse(comp);
+					newWarehouse.sections.get(type).aisles.get(identifier).amount = amnt;
+				}
 			}
 		}
 		return newWarehouse;
