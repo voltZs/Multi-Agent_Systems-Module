@@ -34,6 +34,10 @@ public class Warehouse {
 		this.expectedDeliveries = wrhs.expectedDeliveries;
 	}
 	
+	public int getDaliyChargeAmnt(){
+		return dailyCharge;
+	}
+	
 	public Double calculateStorageCharge() {
 		Double charge = 0.0;
 		for (String sectionType : sections.keySet()) {

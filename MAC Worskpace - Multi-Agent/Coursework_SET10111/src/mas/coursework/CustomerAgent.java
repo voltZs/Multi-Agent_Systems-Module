@@ -182,7 +182,6 @@ public class CustomerAgent extends Agent{
 					oe.printStackTrace();
 				}
 				responseReceived = true;
-				System.out.println(myAgent.getAID().getLocalName() + " ending day!");
 			} else {
 				block();
 			}

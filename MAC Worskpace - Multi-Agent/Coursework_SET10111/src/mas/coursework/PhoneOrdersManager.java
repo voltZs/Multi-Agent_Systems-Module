@@ -58,19 +58,26 @@ public class PhoneOrdersManager {
 		return result;
 	}
 	
-	private String orderToString(SellPhones order) {
+	public String orderToString(SellPhones order) {
 		String result = "";
+		result += order;
 		result += "\t\tDue: " + order.getDaysDue() + "\n";
 		result += "\t\tPerDayPenalty: " + order.getPerDayPenalty() + "\n";
-		result += "\t\tPhone:\n";
+		result += "\t\tUnitPrice: " + order.getUnitPrice() + "\n";
+		result += "\t\tUnits: " + order.getQuantity() + "\n";
 		try {
-			result += "\t\tscreen: " + order.getPhone().getScreen() + "\n";
-			result += "\t\tbattery: " + order.getPhone().getBattery()+ "\n";
+			result += "\t\tscreen: " + order.getPhone().getScreen().getIdentifier() + "\n";
+			result += "\t\tbattery: " + order.getPhone().getBattery().getIdentifier() + "\n";
 		} catch (OntologyException e) {
 			e.printStackTrace();
 		}
-		result += "\t\tram:" + order.getPhone().getRam() + "\n";
-		result += "\t\tstorage: " + order.getPhone().getStorage() + "\n";
+		result += "\t\tram:" + order.getPhone().getRam().getIdentifier()  + "\n";
+		result += "\t\tstorage: " + order.getPhone().getStorage().getIdentifier()  + "\n";
+		return result;
+	}
+	
+	public int calculateDueIn(SellPhones order){
+		int result = (order.getDaysDue() - phoneOrders.get(order));
 		return result;
 	}
 	
@@ -82,10 +89,6 @@ public class PhoneOrdersManager {
 			result *= order.getPerDayPenalty();
 		}
 		return result;
-	}
-	
-	public Double calculateUrgency(SellPhones order){
-		return 1.0;
 	}
 	
 	public void matrixToString(HashMap<SellPhones, Double> matrix){
@@ -124,6 +127,11 @@ public class PhoneOrdersManager {
 
 	public void clearTodaysOrders() {
 		phoneOrdersToday.clear();
+	}
+
+	public void shipOrder(SellPhones shippedOrder) {
+		phoneOrders.remove(shippedOrder);
+		
 	}
 
 }

@@ -135,9 +135,9 @@ public class ManufacturerAgent extends Agent {
 							dailyTasks.addSubBehaviour(new PhoneOrdersListener(myAgent));
 							dailyTasks.addSubBehaviour(new QueryStocks(myAgent));
 							dailyTasks.addSubBehaviour(new StockResponseListener(myAgent));
+							dailyTasks.addSubBehaviour(new RespondToPhoneOrders(myAgent));
 							dailyTasks.addSubBehaviour(new OrderComponents(myAgent));
 							dailyTasks.addSubBehaviour(new OrderConfirmationListener(myAgent));
-							dailyTasks.addSubBehaviour(new RespondToPhoneOrders(myAgent));
 							dailyTasks.addSubBehaviour(new ShipOrders(myAgent));
 							dailyTasks.addSubBehaviour(new EndDay(myAgent));
 							myAgent.addBehaviour(dailyTasks);
@@ -186,6 +186,8 @@ public class ManufacturerAgent extends Agent {
 						if (action instanceof SellPhones) {
 							SellPhones order = (SellPhones) action;
 							phoneOrdersMngr.phoneOrderReceived(order);
+							System.out.println("Received phone order:");
+							System.out.println(phoneOrdersMngr.orderToString(order));
 							orderCount++;
 						}
 					}
@@ -194,6 +196,8 @@ public class ManufacturerAgent extends Agent {
 				} catch (OntologyException oe) {
 					oe.printStackTrace();
 				}
+
+				System.out.println("----------------");
 			} else {
 				block();
 			}
@@ -336,6 +340,9 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 //			DECIDE ON PHONE ORDERS
 			ArrayList<SellPhones> acceptedOrders = profitBrain.decideOnPhoneOrders(phoneOrdersMngr, warehouse);
+			System.out.println("Accepted " + acceptedOrders.size() + " phone orders.\n---------------");
+//			System.out.println("Pending orders")
+			
 			for(SellPhones orderedToday : phoneOrdersMngr.getNewOrders()){
 				ACLMessage msg = null; 
 				if(acceptedOrders.indexOf(orderedToday) == -1){
@@ -382,13 +389,10 @@ public class ManufacturerAgent extends Agent {
 			
 //			DECIDE WHAT TO ORDER
 			ArrayList<SellComponents> todaysOrders = profitBrain.decideWhatToOrder(warehouse, phoneOrdersMngr);
-			System.out.println("Was told to order: " + todaysOrders);
+			System.out.println("Was told to submit ("+ todaysOrders +") orders");
 			
 			for(SellComponents order : todaysOrders){
-//				THIS NEEDS TO BBE REMOVED WHEN PROFITBRAIN IMPLEMENTS SETTING SUPPLIER BY THE compMarket 
-//				AND THE REST OF REFERENCES TO SUPPLIER NEED TO BE REPLACED BY CHECKING WHAT THE SUPPLIER IN THE ORDER IS
-				AID supplier = new AID("supplier1", AID.ISLOCALNAME);
-				order.setSeller(supplier);
+				AID supplier = order.getSeller();
 				order.setBuyer(myAgent.getAID());
 				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 				msg.setLanguage(codec.getName());
@@ -409,6 +413,7 @@ public class ManufacturerAgent extends Agent {
 				System.out.println("So I ordered "+ order.getOrderPairs());
 				componentOrdersToday++;
 			}	
+			System.out.println("ComponentOrdersToday: " + componentOrdersToday);
 		}
 	}
 
@@ -449,7 +454,11 @@ public class ManufacturerAgent extends Agent {
 //					LOGIC FOR HANDLING ITEMS THAT HAVE BEEN DISCONFIRMED TO BE IN STOCK
 				}
 				receivedOrderResponses++;
+				System.out.println("receivedOrderResponses in order conf lisstener: " + receivedOrderResponses);
+				System.out.println("componentOrdersToday in order conf lisstener: " + componentOrdersToday);
 			} else {
+				
+				System.out.println("BBlocking orderconfirmationlistener");
 				block();
 			}
 		}
@@ -488,8 +497,9 @@ public class ManufacturerAgent extends Agent {
 			System.out.println("Today shipping:" + toBeShipped);
 			
 //			Remove number of shipped components from the warehouse
-			for(SellPhones shippedOrder : profitBrain.getShippedToday()){
+			for(SellPhones shippedOrder : profitBrain.getShipToday()){
 				warehouse.assembleOrder(shippedOrder);
+				phoneOrdersMngr.shipOrder(shippedOrder);
 			}
 		}
 	}

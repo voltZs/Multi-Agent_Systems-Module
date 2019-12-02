@@ -2,22 +2,24 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="addOrder" key="selection"/>
+		<item value="shipToday" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="addOrderorde"/>
-			<item value="addOrder"/>
-			<item value="phoneOrders"/>
-			<item value="decide"/>
-			<item value="generate"/>
-			<item value="addToW"/>
-			<item value="addT"/>
-			<item value="st"/>
+			<item value="shipToday"/>
+			<item value="shippedToday"/>
+			<item value="Market"/>
+			<item value="Markert"/>
+			<item value="comp"/>
+			<item value="toStr"/>
+			<item value="daysDue"/>
+			<item value="was told to order"/>
 		</list>
 		<list key="replacehistory">
+			<item value="shipToday"/>
+			<item value="compMarketToString"/>
 			<item value="WarehouseAisle"/>
 			<item value="Auctioneer"/>
 		</list>

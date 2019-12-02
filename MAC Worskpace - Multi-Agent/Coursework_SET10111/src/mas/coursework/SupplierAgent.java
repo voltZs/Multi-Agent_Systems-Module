@@ -257,7 +257,6 @@ public class SupplierAgent extends Agent{
 								try {
 									// Let JADE convert from Java objects to string
 									getContentManager().fillContent(reply, request); 
-									send(reply);
 								} catch (CodecException cExc) {
 									cExc.printStackTrace();
 								} catch (OntologyException oExc) {
