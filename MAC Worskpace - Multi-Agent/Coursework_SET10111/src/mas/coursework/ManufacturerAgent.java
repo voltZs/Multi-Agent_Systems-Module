@@ -138,7 +138,7 @@ public class ManufacturerAgent extends Agent {
 							dailyTasks.addSubBehaviour(new RespondToPhoneOrders(myAgent));
 							dailyTasks.addSubBehaviour(new OrderComponents(myAgent));
 							dailyTasks.addSubBehaviour(new OrderConfirmationListener(myAgent));
-							dailyTasks.addSubBehaviour(new ShipOrders(myAgent));
+							dailyTasks.addSubBehaviour(new AssembleAndShip(myAgent));
 							dailyTasks.addSubBehaviour(new EndDay(myAgent));
 							myAgent.addBehaviour(dailyTasks);
 						} else if (done) {
@@ -338,10 +338,8 @@ public class ManufacturerAgent extends Agent {
 
 		@Override
 		public void action() {
-//			DECIDE ON PHONE ORDERS
-			ArrayList<SellPhones> acceptedOrders = profitBrain.decideOnPhoneOrders(phoneOrdersMngr, warehouse);
-			System.out.println("Accepted " + acceptedOrders.size() + " phone orders.\n---------------");
-//			System.out.println("Pending orders")
+//			DECIDE ON PLAN FOR THE DAY 
+			ArrayList<SellPhones> acceptedOrders = profitBrain.plan(phoneOrdersMngr, warehouse);
 			
 			for(SellPhones orderedToday : phoneOrdersMngr.getNewOrders()){
 				ACLMessage msg = null; 
@@ -351,7 +349,6 @@ public class ManufacturerAgent extends Agent {
 				} else {
 					msg = new ACLMessage(ACLMessage.AGREE);
 //					also after decision made add successful orders to pendingphoneOrders
-					phoneOrdersMngr.acceptOrder(orderedToday);
 				}
 				msg.addReceiver(orderedToday.getBuyer());
 				send(msg);
@@ -359,23 +356,8 @@ public class ManufacturerAgent extends Agent {
 			
 //			And  empty todays orders as we are done with them
 			phoneOrdersMngr.clearTodaysOrders();
-			
 		}
-		
 	}
-	
-
-//	public class Manufacture extends OneShotBehaviour {
-//
-//		public Manufacture(Agent a) {
-//			super(a);
-//		}
-//
-//		@Override
-//		public void action() {
-//		}
-//
-//	}
 
 	public class OrderComponents extends OneShotBehaviour {
 		
@@ -388,7 +370,7 @@ public class ManufacturerAgent extends Agent {
 			componentOrdersToday = 0;
 			
 //			DECIDE WHAT TO ORDER
-			ArrayList<SellComponents> todaysOrders = profitBrain.decideWhatToOrder(warehouse, phoneOrdersMngr);
+			ArrayList<SellComponents> todaysOrders = profitBrain.componentsToOrder();
 			System.out.println("Was told to submit ("+ todaysOrders +") orders");
 			
 			for(SellComponents order : todaysOrders){
@@ -484,21 +466,26 @@ public class ManufacturerAgent extends Agent {
 
 	}
 	
-	public class ShipOrders extends OneShotBehaviour{
+	public class AssembleAndShip extends OneShotBehaviour{
 		
-		public ShipOrders(Agent a) {
+		public AssembleAndShip(Agent a) {
 			super(a);
 		}
 
 		@Override
 		public void action() {
-//			MANUFACTURE AND SHIP!
-			ArrayList<SellPhones> toBeShipped = profitBrain.decideWhatToShip(warehouse, phoneOrdersMngr);
+			
+			HashMap<SellPhones, Integer> toBeAssembled = profitBrain.levelsToAssemble();
+			for(SellPhones phoneOrder : toBeAssembled.keySet()){
+				warehouse.assemble(phoneOrder, toBeAssembled.get(phoneOrder));
+				phoneOrdersMngr.assemble(phoneOrder, toBeAssembled.get(phoneOrder));
+			}
+			
+			ArrayList<SellPhones> toBeShipped = profitBrain.ordersToShip();
 			System.out.println("Today shipping:" + toBeShipped);
 			
 //			Remove number of shipped components from the warehouse
-			for(SellPhones shippedOrder : profitBrain.getShipToday()){
-				warehouse.assembleOrder(shippedOrder);
+			for(SellPhones shippedOrder : toBeShipped){
 				phoneOrdersMngr.shipOrder(shippedOrder);
 			}
 		}
@@ -525,6 +512,7 @@ public class ManufacturerAgent extends Agent {
 //			Increment values for the next day
 			warehouse.incrementNewDay();
 			phoneOrdersMngr.incrementNewDay();
+			profitBrain.incrementNewDay();
 			
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 			msg.addReceiver(tickerAgent);

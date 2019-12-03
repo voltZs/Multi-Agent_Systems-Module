@@ -11,15 +11,18 @@ import mas.coursework_ontology.elements.SellPhones;
 public class PhoneOrdersManager {
 
 	private HashMap<SellPhones, Integer> phoneOrders;
+	private HashMap<SellPhones, Integer> assemblyRemaining;
 	private ArrayList<SellPhones> phoneOrdersToday;
 	
 	public PhoneOrdersManager(){
 		phoneOrders = new HashMap<>();
+		assemblyRemaining = new HashMap<>();
 		phoneOrdersToday = new ArrayList<>();
 	}
 	
 	public void acceptOrder(SellPhones order){
 		phoneOrders.put(order, 0);
+		assemblyRemaining.put(order, order.getQuantity());
 	}
 
 	public void incrementNewDay() {
@@ -27,6 +30,15 @@ public class PhoneOrdersManager {
 			int currentAmnt = phoneOrders.get(phoneOrder);
 			phoneOrders.put(phoneOrder, currentAmnt + 1);
 		}
+	}
+	
+	public void assemble(SellPhones order, int amount){
+		int currRemaining = assemblyRemaining.get(order);
+		assemblyRemaining.put(order, currRemaining-amount);
+	}
+	
+	public int remainingAssembly(SellPhones order){
+		return assemblyRemaining.get(order);
 	}
 	
 	/*
@@ -131,7 +143,7 @@ public class PhoneOrdersManager {
 
 	public void shipOrder(SellPhones shippedOrder) {
 		phoneOrders.remove(shippedOrder);
-		
+		assemblyRemaining.remove(shippedOrder);
 	}
 
 }

@@ -2,12 +2,13 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="shipToday" key="selection"/>
+		<item value="Storage" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="storage"/>
 			<item value="shipToday"/>
 			<item value="shippedToday"/>
 			<item value="Market"/>
@@ -15,7 +16,6 @@
 			<item value="comp"/>
 			<item value="toStr"/>
 			<item value="daysDue"/>
-			<item value="was told to order"/>
 		</list>
 		<list key="replacehistory">
 			<item value="shipToday"/>

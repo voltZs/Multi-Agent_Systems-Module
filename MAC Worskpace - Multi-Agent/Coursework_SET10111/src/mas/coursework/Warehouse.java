@@ -123,10 +123,9 @@ public class Warehouse {
 	}
 	
 	/*
-	 * Removes the components needed for the phone order from the warehouse
+	 * Removes the components of specified quantity needed for the phone order from the warehouse
 	 */
-	public void assembleOrder(SellPhones shippedOrder) {
-		int quantity = shippedOrder.getQuantity();
+	public void assemble(SellPhones shippedOrder, Integer quantity) {
 		ArrayList<Component> comps = PhoneOrdersManager.getPhoneOrderComponents(shippedOrder);
 		for(Component comp : comps){
 			removeFromWarehouse(comp, quantity);

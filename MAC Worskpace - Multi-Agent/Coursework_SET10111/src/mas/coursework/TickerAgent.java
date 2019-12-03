@@ -30,7 +30,7 @@ public class TickerAgent extends Agent{
 	private Ontology ontology = SupplyChainOntology.getInstance();
 	
 	private int dayCount = 0;
-	private int dayMAX = 100;
+	private int dayMAX = 3;
 	private ArrayList<AID> simulationAgents = new ArrayList<>();
 	
 	protected void setup(){
@@ -50,7 +50,7 @@ public class TickerAgent extends Agent{
 			e.printStackTrace();
 		}
 		
-		//wait 5 seconds so other agents can discover the tickerAgent
+		//wait 4 seconds so other agents can discover the tickerAgent
 		doWait(4000);
 		addBehaviour(new ManageDaysBehaviour(this));
 	}

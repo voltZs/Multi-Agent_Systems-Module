@@ -38,7 +38,6 @@
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Screen"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Battery"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.HasInStock"/>
-<fullyQualifiedTypeName name="java.lang.System"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.SellComponents"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Component"/>
@@ -46,4 +45,5 @@
 <fullyQualifiedTypeName name="jade.util.leap.Serializable"/>
 <fullyQualifiedTypeName name="jade.core.AID"/>
 <fullyQualifiedTypeName name="mas.coursework_ontology.elements.Phone"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
 </qualifiedTypeNameHistroy>

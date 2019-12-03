@@ -1,0 +1,14 @@
+package mas.coursework;
+
+import java.util.ArrayList;
+
+import mas.coursework_ontology.elements.SellPhones;
+
+public class Planner {
+	ArrayList<ArrayList<SellPhones>> plan;
+	
+	public Planner(){
+		plan = new ArrayList<>();
+	}
+	
+}

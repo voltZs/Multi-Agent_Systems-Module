@@ -17,13 +17,34 @@ import mas.coursework_ontology.elements.SellPhones;
 public class ProfitBrain {
 	private ArrayList<Double> dailyProfits;
 	private HashMap<String, HashMap<String, ArrayList<BuyingOption>>> componentMarket = new HashMap<>();
-	private ArrayList<SellPhones> shipToday;
+	private Planner planner;
 	
 	public ProfitBrain(){
 		dailyProfits = new ArrayList<>();
 		componentMarket = new HashMap<>();
-		shipToday  = new ArrayList<>();
+		planner = new Planner();
 	}
+	
+	public ArrayList<SellPhones> plan(PhoneOrdersManager phoneOrdersMngr, Warehouse warehouse) {
+		return planner.updatePlan(phoneOrdersMngr, warehouse);
+	}
+
+	public ArrayList<SellComponents> componentsToOrder() {
+		return planner.whatToOrder();
+	}
+	
+	public HashMap<SellPhones, Integer> levelsToAssemble() {
+		return planner.whatToAssemble();
+	}
+
+	public ArrayList<SellPhones> ordersToShip() {
+		return planner.whatToShip();
+	}
+	
+	public void incrementNewDay(){
+		planner.incrementDay();
+	}
+	
 	
 	/*
 	 * Returns boolean - whether order is perceived to increase profit
@@ -44,6 +65,9 @@ public class ProfitBrain {
 			}
 			if(sumOfPhones + order.getQuantity() <=50){
 				acceptedOrders.add(order);
+//				Following line also adds accepted order to phonemanagers pending(accepted) orders 
+//				leave this as without this the orders cannot be shipped
+				phoneOrdersMngr.acceptOrder(order);
 			} else {
 				break;
 			}
@@ -60,7 +84,7 @@ public class ProfitBrain {
 		System.out.println("DECIDING WHAT COMPONENTS TO ORDER: =====================");
 		
 		HashMap<SellPhones, Integer> pendingPhoneOrders = phoneOrdersMngr.getPhoneOrdersMatrix();
-		for(SellPhones phoneOrder : pendingPhoneOrders.keySet()){
+		for(SellPhones phoneOrder : pendingPhoneOrders.keySet()){ 
 			int dueIn = phoneOrdersMngr.calculateDueIn(phoneOrder);
 			System.out.println("\nChecking this order: "+ phoneOrder.getQuantity() + " phones due in " + dueIn);
 			for(Component comp : PhoneOrdersManager.getPhoneOrderComponents(phoneOrder)){
@@ -119,6 +143,7 @@ public class ProfitBrain {
 	 * returns an array of PhoneOrders to sell
 	 */
 	public ArrayList<SellPhones> decideWhatToShip(Warehouse warehouse, PhoneOrdersManager phoneOrdersMngr){
+		 ArrayList<SellPhones> shipToday = new ArrayList<>();
 		HashMap<SellPhones, Integer> pendingOrders = phoneOrdersMngr.getPhoneOrdersMatrix();
 		for(SellPhones order : pendingOrders.keySet()){
 			if(phoneOrdersMngr.calculateDueIn(order) == 0){
@@ -216,22 +241,6 @@ public class ProfitBrain {
 		}
 		return urgencyMatrix;
 	}
-
-	private int estimateAssemblyPrice(SellPhones order) {
-		ArrayList<Component> phoneComponents = PhoneOrdersManager.getPhoneOrderComponents(order);
-		int total = 0;
-		for(Component comp : phoneComponents){
-			int maxPrice = 0;
-			for(BuyingOption opt : getComponentBuyingOptions(comp)){
-				if(opt.price>maxPrice){
-					maxPrice = opt.price;
-				}
-			}
-			total += maxPrice;
-		}
-		total *= order.getQuantity();
-		return 0;
-	}
 	
 	public Double mapOverdueUrgency(Double daysOverdue){
 		if(daysOverdue < 0){
@@ -241,6 +250,9 @@ public class ProfitBrain {
 		}
 	}
 
+//	===================== CALCULATE PROFITS FOR THE DAY ==============================
+	
+	
 	/*
 	 * Calculates this day's profit based on Total shipped orders' value minus charges for late orders
 	 * minus storage charges in warehouse minus value of purchased components
@@ -256,9 +268,7 @@ public class ProfitBrain {
 							"Storage chrgs: "+ storageCharges+ "\n" +
 							"Component prchss: "+ componentPurchases + "\n");
 		Double todaysProfit = totalOrdersShipped - lateOrderCharges -storageCharges - componentPurchases;
-		
 		dailyProfits.add(todaysProfit);
-		shipToday.clear();
 	}
 	
 	/*
@@ -267,14 +277,10 @@ public class ProfitBrain {
 	public ArrayList<Double> getDailyProfits(){
 		return dailyProfits;
 	}
-	
-	public ArrayList<SellPhones> getShipToday(){
-		return shipToday;
-	}
-	
+
 	private Double totalValueOfOrdersShipped() {
 		Double sum = 0.0;
-		for(SellPhones shipped : shipToday){
+		for(SellPhones shipped : planner.whatToShip()){
 			sum += shipped.getUnitPrice() * shipped.getQuantity();
 		}
 		return sum;
@@ -311,6 +317,10 @@ public class ProfitBrain {
 		}
 		return sum;
 	}
+	
+	
+	
+//	==================== COMPONENT MARKET - INNER REPRESENTATION OF SUPPLIER PRICES ================
 
 	public void updateComponentMarket(HasInStock stockUpdate){
 		Component comp = (Component) stockUpdate.getItem();
@@ -386,6 +396,8 @@ public class ProfitBrain {
 		return result;
 	}
 	
+//	================== INNER CLASS BUYING OPTION
+	
 	private class BuyingOption{
 		public AID supplierID;
 		public int price;
@@ -397,7 +409,241 @@ public class ProfitBrain {
 			this.deliveryTime = deliveryTime;
 		}
 	}
+	
+//	================== INNER CLASS PLANNER - LOGIC FOR DECIDING ON MANUFACTURER CHOICES
+	
+	public class Planner {
+		ArrayList<ArrayList<SellPhones>> phoneShipmentSchedule;
+		ArrayList<HashMap<SellPhones, Integer>> phoneAssemblySchedule;
+		ArrayList<ArrayList<SellComponents>> componentOrderSchedule;
+		int today;
+		
+		public Planner(){
+			phoneShipmentSchedule = new ArrayList<>();
+			phoneAssemblySchedule = new ArrayList<>();
+			componentOrderSchedule = new ArrayList<>();
+			today = 0;
+		}
+		
+		/*
+		 * Updates the plan - what orders to fulfil and what components to order which day
+		 * returns list of SellPhones phone orders to accept in order to execute this plan
+		 */
+		public ArrayList<SellPhones> updatePlan(PhoneOrdersManager phoneOrdersMngr, Warehouse warehouse) {
+			ArrayList<SellPhones> newPhoneOrders = phoneOrdersMngr.getNewOrders();
+			orderByIdealProfit(newPhoneOrders);
+			
+			ArrayList<SellPhones> accepted = new ArrayList<>();	
+//			try to fit order in schedule, if possibble, accept
+			for(SellPhones order : newPhoneOrders){
+				
+				ArrayList<ScheduleOption> scheduleOptions = generateScheduleOptions(phoneOrdersMngr, warehouse, order);
+				
+				if(scheduleOptions.size() == 0){
+//					THIS ORDER CANNOT BE ACCEPTED
+					break;
+				}
+				
+//				pick the soonest option
+				scheduleOptions.sort((ScheduleOption a, ScheduleOption b) -> {
+					return ((Integer)a.day).compareTo(b.day);
+				});
+				ScheduleOption pickedOption = scheduleOptions.get(0);
+				
+//				add to phone shipment schedule
+				int dayToShip = pickedOption.day;
+				while(phoneShipmentSchedule.size() < dayToShip+1){
+					phoneShipmentSchedule.add(new ArrayList<>());
+				}
+				phoneShipmentSchedule.get(dayToShip).add(order);
+				
+				
+//				add to phone component order schedule
+				for(Component comp : phoneOrdersMngr.getPhoneOrderComponents(order)){
+					int deliveryTime = Math.abs(pickedOption.howToOrder.get(comp).deliveryTime);
+					AID seller = pickedOption.howToOrder.get(comp).supplierID;
+					int dayToOrder = dayToShip - deliveryTime;
+					while(componentOrderSchedule.size() < dayToOrder+1){
+						componentOrderSchedule.add(new ArrayList<>());
+					}
+					System.out.println("Seller: " + seller );
+					ArrayList<SellComponents> orderedOnDay = componentOrderSchedule.get(dayToOrder);
+					SellComponents targetOrder = null;
+					for(SellComponents compOrder : orderedOnDay){
+						System.out.println(" compOrder seller " + compOrder.getSeller());
+						if(compOrder.getSeller().equals(seller)){
+							targetOrder = compOrder;
+							break;
+						}
+					}
+					if(targetOrder == null){
+						targetOrder = new SellComponents();
+						targetOrder.setSeller(seller);
+						orderedOnDay.add(targetOrder);
+					}
+					ArrayList<OrderPair> orderPairs = (ArrayList<OrderPair>) targetOrder.getOrderPairs();
+					if(orderPairs == null){
+						orderPairs =  new ArrayList<>();
+					}
+					OrderPair pair = new OrderPair();
+					pair.setOrderedItem(comp);
+					pair.setQuantity(order.getQuantity());
+					orderPairs.add(pair);
+					targetOrder.setOrderPairs(orderPairs);
+				}
+				
+//				add to phone assembly schedule
+				
+				
+				
+				accepted.add(order);
+//				Following line also adds accepted order to phoneManagers pending(accepted) orders 
+//				leave this as without this the orders cannot be shipped
+				phoneOrdersMngr.acceptOrder(order);
+			}
+			
+			
+			
+			System.out.println("Accepted " + accepted.size() + " phone orders.\n---------------");
+			
+//			componentOrderSchedule.add(decideWhatToOrder(warehouse, phoneOrdersMngr));
+			phoneShipmentSchedule.add(decideWhatToShip(warehouse, phoneOrdersMngr));
+			return accepted;
+		}
+		
+		
+		private void orderByIdealProfit(ArrayList<SellPhones> unordered){
+			unordered.sort((SellPhones sp1, SellPhones sp2) -> {
+				Integer idealProfit1 = (sp1.getUnitPrice()*sp1.getQuantity()) - estimateAssemblyPrice(sp1);
+				Integer idealProfit2 = (sp2.getUnitPrice()*sp2.getQuantity()) - estimateAssemblyPrice(sp2);
+				return idealProfit1.compareTo(idealProfit2) * -1;
+			});
+		}
+		
+		private ArrayList<ScheduleOption> generateScheduleOptions(PhoneOrdersManager phoneOrdersMngr, 
+																	Warehouse warehouse, 
+																	SellPhones order){
+			ArrayList<ScheduleOption> scheduleOptions = new ArrayList<>();
+			//loop from today till the day the order would become overdue
+			for(int i = today; i < today+order.getDaysDue(); i++){
+				ScheduleOption scheduleOption = new ScheduleOption(i);
+				boolean validOption = true;
+				
+				if(phoneAssemblySchedule.size() < i+1){
+					phoneAssemblySchedule.add(new HashMap<>());
+				}						
+				//check if enough spaces to assemble by that day; if not continue > 
+				int sum = 0;
+				for(int j = today; j<i; j++){
+					for(SellPhones item : phoneAssemblySchedule.get(j).keySet()){
+						sum+= phoneAssemblySchedule.get(j).get(item);
+						if(sum > 50){
+							validOption = false;
+							break;
+						}
+					}
+					if(!validOption){
+						break;
+					}
+				}
+				if(!validOption){
+//					SHIPPING ON DAY i FOR THIS ORDER IS NOT AN OPTION
+					continue;
+				}
+				
+				//check if all items can be ordered for this in time; if not continue >
+				for( Component comp : phoneOrdersMngr.getPhoneOrderComponents(order)){
+					BuyingOption cheapestOpt = getCheapestOption(comp);
+					BuyingOption soonestOpt = getSoonestOption(comp);
+					
+					System.out.println("Comp: " + comp.getType() + " " + comp.getIdentifier());
+					System.out.println("i: " + i + " today: " + today);
+					System.out.println("Cheapest deliveryTime: " + Math.abs(cheapestOpt.deliveryTime));
+					System.out.println("Soonest deliveryTime: " + Math.abs(cheapestOpt.deliveryTime));
+					
+					boolean cheapestNotLate = Math.abs(cheapestOpt.deliveryTime) <= i-today;
+					boolean soonestNotLate = Math.abs(soonestOpt.deliveryTime) <= i-today;;
+					boolean cheapestBetter = ((cheapestOpt.deliveryTime*-1) - (soonestOpt.deliveryTime*-1)) * warehouse.getDaliyChargeAmnt() 
+							< soonestOpt.price - cheapestOpt.price; 
+					
+					System.out.println("Cheapest better: " + cheapestBetter);
+					
+					//save as ordering option along with cheapest possible component buying option (don't forget to keep storage charges in mind)
+					if(cheapestBetter && cheapestNotLate){
+						scheduleOption.addInstruction(comp, cheapestOpt);
+					} else if(soonestNotLate) {
+						scheduleOption.addInstruction(comp, soonestOpt);
+					} else {
+//						SHIPPING ON DAY i FOR THIS COMPONENT FOR THIS ORDER IS NOT AN OPTION
+						System.out.println("Not valid order options for this day");
+						validOption = false;
+						break;
+					}
+				}
+				if(validOption){
+					scheduleOptions.add(scheduleOption);
+				}
+			}
+			
+//			System.out.println("SCHEDULE OPTIONS ARE FOLLOWING: ");
+//			for(ScheduleOption scheduleOption : scheduleOptions){
+//				System.out.println("\t Ship on: " + scheduleOption.day);
+//				System.out.println("\t Best order opt: \ttime: \tsupplier");
+//				for(Component comp : scheduleOption.howToOrder.keySet()){
+//					System.out.println("\t\t" + comp.getType() + " : " + scheduleOption.howToOrder.get(comp).deliveryTime + " : " + scheduleOption.howToOrder.get(comp).supplierID);
+//				}
+//			}
+			return scheduleOptions;
+		}
+		
 
+		public ArrayList<SellComponents> whatToOrder() {
+			return componentOrderSchedule.get(today);
+		}
+		
+		public HashMap<SellPhones, Integer> whatToAssemble() {
+			return phoneAssemblySchedule.get(today);
+		}
+		
+		public ArrayList<SellPhones> whatToShip() {
+			return phoneShipmentSchedule.get(today);
+		}
+		
+		public void incrementDay(){
+			today++;
+		}
+		
+//		============== INNER INNER CLASS =========
+		private class ScheduleOption{
+			int day;
+			HashMap<Component, BuyingOption> howToOrder;
+			
+			public ScheduleOption(int day){
+				this.day = day;
+				howToOrder = new HashMap<>();
+			}
+			public void addInstruction(Component comp, BuyingOption buyingOpt){
+				howToOrder.put(comp, buyingOpt);
+			}
+		}
+	}
+	
+
+	private int estimateAssemblyPrice(SellPhones order) {
+		ArrayList<Component> phoneComponents = PhoneOrdersManager.getPhoneOrderComponents(order);
+		int total = 0;
+		for(Component comp : phoneComponents){
+			int maxPrice = 0;
+			for(BuyingOption opt : getComponentBuyingOptions(comp)){
+				if(opt.price>maxPrice){
+					maxPrice = opt.price;
+				}
+			}
+			total += maxPrice;
+		}
+		total *= order.getQuantity();
+		return 0;
+	}
 }
 
 
