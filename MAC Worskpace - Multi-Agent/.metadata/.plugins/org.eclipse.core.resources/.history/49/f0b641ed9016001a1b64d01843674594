@@ -13,7 +13,7 @@ import mas.coursework_ontology.elements.Screen;
 import mas.coursework_ontology.elements.SellPhones;
 public class SupplyChainSimulation {
 	
-	private static int numOfCustomers = 3;
+	private static int numOfCustomers = 5;
 	
 	public static HashMap<Component, Integer> warehouse;
 

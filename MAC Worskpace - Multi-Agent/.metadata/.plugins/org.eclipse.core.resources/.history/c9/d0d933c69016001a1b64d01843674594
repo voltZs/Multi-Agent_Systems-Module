@@ -331,7 +331,9 @@ public class ProfitBrain {
 				}
 			}
 		}
-
+		
+		
+		
 		private void orderByIdealProfit(ArrayList<SellPhones> unordered){
 			unordered.sort((SellPhones sp1, SellPhones sp2) -> {
 				Integer idealProfit1 = (sp1.getUnitPrice()*sp1.getQuantity()) - estimateAssemblyPrice(sp1);
