@@ -1,1 +1,1 @@
-http://10.229.100.10:7778/acc
+http://zsolts-mbp.lan:7778/acc

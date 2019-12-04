@@ -84,14 +84,14 @@ public class ProfitBrain {
 	private Double componentPurchaseValue(ArrayList<SellComponents> todaysPurchases) {
 		Double sum = 0.0;
 //		System.out.println("Today's purchases from warehouse" + todaysPurchases);
-		for(SellComponents order : todaysPurchases){
-			System.out.println("In todays componenet purchases: ");
-			System.out.println("\t seller " + order.getSeller());
-			for(OrderPair pair : order.getOrderPairs()){
-				System.out.println("item: "+ ((Component)pair.getOrderedItem()).getType() + " - " 
-									+ ((Component)pair.getOrderedItem()).getIdentifier());
-			}
-		}
+//		for(SellComponents order : todaysPurchases){
+//			System.out.println("In todays componenet purchases: ");
+//			System.out.println("\t seller " + order.getSeller());
+//			for(OrderPair pair : order.getOrderPairs()){
+//				System.out.println("\t\titem: "+ ((Component)pair.getOrderedItem()).getType() + " - " 
+//									+ ((Component)pair.getOrderedItem()).getIdentifier());
+//			}
+//		}
 		for(SellComponents order : todaysPurchases){
 			AID seller = order.getSeller();
 			for (OrderPair pair : order.getOrderPairs()){
@@ -99,11 +99,11 @@ public class ProfitBrain {
 				Component comp = (Component) pair.getOrderedItem();
 //				System.out.println("Purchased " + amnt + " components - " + comp.getType() + ", " + comp.getIdentifier());
 				ArrayList<BuyingOption> options = componentMarket.get(comp.getType()).get(comp.getIdentifier());
-				System.out.println(options);
+//				System.out.println(options);
 				for (BuyingOption option : options){
 					if(option.supplierID.equals(seller)){
-						System.out.println("bought"+ comp.getType() + " - " + comp.getIdentifier() +" for " + option.price + " * "+ amnt);
-						System.out.println("bought from: " +seller);
+//						System.out.println("bought"+ comp.getType() + " - " + comp.getIdentifier() +" for " + option.price + " * "+ amnt);
+//						System.out.println("bought from: " +seller);
 						sum += option.price * amnt;
 						break;
 					}
@@ -277,11 +277,11 @@ public class ProfitBrain {
 				while(componentOrderSchedule.size() < dayToOrder+1){
 					componentOrderSchedule.add(new ArrayList<>());
 				}
-				System.out.println("Seller: " + seller );
+//				System.out.println("Seller: " + seller );
 				ArrayList<SellComponents> orderedOnDay = componentOrderSchedule.get(dayToOrder);
 				SellComponents targetOrder = null;
 				for(SellComponents compOrder : orderedOnDay){
-					System.out.println(" compOrder seller " + compOrder.getSeller());
+//					System.out.println(" compOrder seller " + compOrder.getSeller());
 					if(compOrder.getSeller().equals(seller)){
 						targetOrder = compOrder;
 						break;

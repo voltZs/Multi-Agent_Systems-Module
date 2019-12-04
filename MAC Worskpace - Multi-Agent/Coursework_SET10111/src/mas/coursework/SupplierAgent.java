@@ -116,9 +116,8 @@ public class SupplierAgent extends Agent{
 					if (ce instanceof CalendarNotification) {
 						CalendarNotification notif = (CalendarNotification) ce;
 						boolean newDay = notif.isNewDay();
-						boolean done = notif.isDone();
 						boolean terminate = notif.getTerminate();
-						if(newDay){
+						if(newDay && !terminate){
 //							add cyclic behaviours
 							ArrayList<CyclicBehaviour> cyclicBehaviours = new ArrayList<>();
 							CyclicBehaviour stockCheckingListener = new StockCheckingListener(myAgent);
@@ -128,10 +127,14 @@ public class SupplierAgent extends Agent{
 							cyclicBehaviours.add(stockCheckingListener);
 							cyclicBehaviours.add(orderProcessingListener);
 							addBehaviour(new EndDayListener(myAgent, cyclicBehaviours));
-						} 
-						else if(terminate){
+						} else{
 //							not a new day and done is true -> simulation must be over
 							System.out.println("Deleting agent: " + getAID().getLocalName());
+							try {
+								DFService.deregister(myAgent);
+							} catch (FIPAException e) {
+								e.printStackTrace();
+							}
 							myAgent.doDelete();
 						}
 					}

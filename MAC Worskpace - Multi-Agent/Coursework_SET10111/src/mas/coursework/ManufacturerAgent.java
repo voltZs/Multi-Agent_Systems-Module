@@ -50,14 +50,14 @@ public class ManufacturerAgent extends Agent {
 	private int componentOrdersToday;
 	
 	private ProfitBrain profitBrain = new ProfitBrain();
-	private Warehouse warehouse = new Warehouse(5);
+	private Warehouse warehouse;
 	private PhoneOrdersManager phoneOrdersMngr = new PhoneOrdersManager();
 
 	protected void setup() {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
-		String[] args = (String[]) this.getArguments();
-
+		Object[] args = this.getArguments();
+		warehouse = new Warehouse((int) args[0]);
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
@@ -108,8 +108,8 @@ public class ManufacturerAgent extends Agent {
 					if (ce instanceof CalendarNotification) {
 						CalendarNotification notif = (CalendarNotification) ce;
 						boolean newDay = notif.isNewDay();
-						boolean done = notif.isDone();
-						if (newDay) {
+						boolean terminate = notif.getTerminate();
+						if (newDay && !terminate) {
 							// set tickerAgent
 							// we nest this in here because only tickerAgents
 							// send calendarNotifications with newDay set true
@@ -141,10 +141,15 @@ public class ManufacturerAgent extends Agent {
 							dailyTasks.addSubBehaviour(new AssembleAndShip(myAgent));
 							dailyTasks.addSubBehaviour(new EndDay(myAgent));
 							myAgent.addBehaviour(dailyTasks);
-						} else if (done) {
+						} else {
 							// not a new day and done is true -> simulation must
 							// be over
 							System.out.println("Deleting agent: " + getAID().getLocalName());
+							try {
+								DFService.deregister(myAgent);
+							} catch (FIPAException e) {
+								e.printStackTrace();
+							}
 							myAgent.doDelete();
 						}
 					}
@@ -371,7 +376,7 @@ public class ManufacturerAgent extends Agent {
 			
 //			DECIDE WHAT TO ORDER
 			ArrayList<SellComponents> todaysOrders = profitBrain.componentsToOrder();
-			System.out.println("Was told to submit ("+ todaysOrders +") orders");
+			System.out.println("Submitted "+ todaysOrders.size() +" component orders");
 			
 			for(SellComponents order : todaysOrders){
 				AID supplier = order.getSeller();
@@ -392,10 +397,8 @@ public class ManufacturerAgent extends Agent {
 					ontExc.printStackTrace();
 				}
 				send(msg);
-				System.out.println("So I ordered "+ order.getOrderPairs());
 				componentOrdersToday++;
 			}	
-			System.out.println("ComponentOrdersToday: " + componentOrdersToday);
 		}
 	}
 
@@ -423,7 +426,7 @@ public class ManufacturerAgent extends Agent {
 							Concept action = ((Action) ce).getAction();
 							if(action instanceof SellComponents){
 								SellComponents confirmedOrder = (SellComponents) action;
-								System.out.println("Order confirmation received.");
+//								System.out.println("Order confirmation received.");
 								warehouse.receiveComponents(confirmedOrder);
 							}
 						}
@@ -436,8 +439,6 @@ public class ManufacturerAgent extends Agent {
 //					LOGIC FOR HANDLING ITEMS THAT HAVE BEEN DISCONFIRMED TO BE IN STOCK
 				}
 				receivedOrderResponses++;
-				System.out.println("receivedOrderResponses in order conf lisstener: " + receivedOrderResponses);
-				System.out.println("componentOrdersToday in order conf lisstener: " + componentOrdersToday);
 			} else {
 				
 				System.out.println("BBlocking orderconfirmationlistener");
@@ -476,14 +477,14 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			
 			HashMap<SellPhones, Integer> toBeAssembled = profitBrain.levelsToAssemble();
+			System.out.println("Today assembling: ");
 			for(SellPhones phoneOrder : toBeAssembled.keySet()){
 				phoneOrdersMngr.assemble(phoneOrder, toBeAssembled.get(phoneOrder));
+				System.out.println("\tamount: "+ toBeAssembled.get(phoneOrder) + " for " + phoneOrder);
 			}
 			
 			ArrayList<SellPhones> toBeShipped = profitBrain.ordersToShip();
-			System.out.println("Today shipping:" + toBeShipped);
-			
-//			Remove number of shipped components from the warehouse
+			System.out.println("Today shipping: " + toBeShipped.size() + " phone orders");
 			for(SellPhones shippedOrder : toBeShipped){
 				warehouse.ship(shippedOrder);
 				phoneOrdersMngr.shipOrder(shippedOrder);

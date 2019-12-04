@@ -10,6 +10,8 @@ import mas.coursework_ontology.elements.SmallPhone;
 import mas.coursework_ontology.elements.Storage;
 
 public class PhoneOrderGenerator {
+	int penaltyRange;
+	
 	SellPhones order;
 	Phone phone;
 	Screen screen;
@@ -21,7 +23,8 @@ public class PhoneOrderGenerator {
 	int daysDue;
 	int perDayPenalty;
 	
-	public PhoneOrderGenerator(){
+	public PhoneOrderGenerator(int penaltyRange){
+		this.penaltyRange = penaltyRange;
 	}
 	
 	public SellPhones getOrder(){
@@ -76,7 +79,7 @@ public class PhoneOrderGenerator {
 		order.setUnitPrice(unitPrice);
 		daysDue = (int) Math.floor(1 + 10* Math.random());
 		order.setDaysDue(daysDue);
-		perDayPenalty = (int) (quantity * Math.floor(1 + 50 * Math.random()));
+		perDayPenalty = (int) (quantity * Math.floor(1 + penaltyRange * Math.random()));
 		order.setPerDayPenalty(perDayPenalty);
 	}
 }

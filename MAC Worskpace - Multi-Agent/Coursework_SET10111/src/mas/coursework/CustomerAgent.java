@@ -32,11 +32,14 @@ public class CustomerAgent extends Agent{
 	
 	private AID tickerAgent;
 	private AID manufacturerAgent;
+	PhoneOrderGenerator generator;
 	
 	protected void setup(){
+		
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
-		String[] args = (String[])this.getArguments();
+		Object[] args = this.getArguments();
+		generator = new PhoneOrderGenerator((int) args[0]);
 		
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(getAID());
@@ -72,8 +75,8 @@ public class CustomerAgent extends Agent{
 					if (ce instanceof CalendarNotification) {
 						CalendarNotification notif = (CalendarNotification) ce;
 						boolean newDay = notif.isNewDay();
-						boolean done = notif.isDone();
-						if(newDay){
+						boolean terminate = notif.getTerminate();
+						if(newDay & !terminate){
 //							set tickerAgent
 //							we nest this in here because only tickerAgents send calendarNotifications with newDay set true
 							if(tickerAgent == null){
@@ -84,9 +87,14 @@ public class CustomerAgent extends Agent{
 							makeOrder.addSubBehaviour(new GenerateOrder(myAgent));
 							makeOrder.addSubBehaviour(new OrderResponseListener(myAgent));
 							addBehaviour(makeOrder);
-						} else if(done){
+						} else{
 //							not a new day and done is true -> simulation must be over
 							System.out.println("Deleting agent: " + getAID().getLocalName());
+							try {
+								DFService.deregister(myAgent);
+							} catch (FIPAException e) {
+								e.printStackTrace();
+							}
 							myAgent.doDelete();
 						}
 					}
@@ -129,7 +137,6 @@ public class CustomerAgent extends Agent{
 			msg.addReceiver(manufacturerAgent);
 			msg.setLanguage(codec.getName());
 			msg.setOntology(ontology.getName());
-			PhoneOrderGenerator generator = new PhoneOrderGenerator();
 			SellPhones order = generator.getOrder();
 			order.setBuyer(getAID());
 			Action request = new Action();
