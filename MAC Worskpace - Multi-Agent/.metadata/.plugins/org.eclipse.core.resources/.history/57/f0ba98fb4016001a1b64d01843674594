@@ -492,32 +492,6 @@ public class ProfitBrain {
 				}
 				
 //				add to phone assembly schedule
-				//find shortest delivery time in components - 
-				//this is when all all components are available to use for manufacturing
-				int smallestDelivTime = Integer.MAX_VALUE;
-				for(Component comp : phoneOrdersMngr.getPhoneOrderComponents(order)){
-					int dTime = Math.abs(pickedOption.howToOrder.get(comp).deliveryTime);
-					smallestDelivTime = dTime < smallestDelivTime ? dTime : smallestDelivTime;
-				}
-				int daysForAssembly = smallestDelivTime;
-//				build everything as soon as 
-				int amountToGo = order.getQuantity();
-				for (int i = dayToShip - daysForAssembly; i< dayToShip; i++){
-					int freeSpaces = 50;
-					for(SellPhones item : phoneAssemblySchedule.get(i).keySet()){
-						freeSpaces -= phoneAssemblySchedule.get(i).get(item);
-					}
-					if(freeSpaces < 0){
-						System.out.println("SOMETHING IS SERIIOUSLY WRONG HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-					}
-					if(freeSpaces > 0){
-						int assembleOnThisDay = Math.min(freeSpaces, amountToGo);
-						phoneAssemblySchedule.get(i).put(order, assembleOnThisDay);
-						amountToGo -= assembleOnThisDay;
-					}
-				}
-				
-				
 				
 				
 				
@@ -634,9 +608,6 @@ public class ProfitBrain {
 		}
 		
 		public ArrayList<SellPhones> whatToShip() {
-			if(phoneShipmentSchedule.size() < today+1){
-				return new ArrayList();
-			}
 			return phoneShipmentSchedule.get(today);
 		}
 		

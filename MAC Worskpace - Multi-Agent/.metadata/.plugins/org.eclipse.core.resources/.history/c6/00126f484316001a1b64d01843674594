@@ -477,6 +477,7 @@ public class ManufacturerAgent extends Agent {
 			
 			HashMap<SellPhones, Integer> toBeAssembled = profitBrain.levelsToAssemble();
 			for(SellPhones phoneOrder : toBeAssembled.keySet()){
+				warehouse.assemble(phoneOrder, toBeAssembled.get(phoneOrder));
 				phoneOrdersMngr.assemble(phoneOrder, toBeAssembled.get(phoneOrder));
 			}
 			
@@ -485,7 +486,6 @@ public class ManufacturerAgent extends Agent {
 			
 //			Remove number of shipped components from the warehouse
 			for(SellPhones shippedOrder : toBeShipped){
-				warehouse.ship(shippedOrder);
 				phoneOrdersMngr.shipOrder(shippedOrder);
 			}
 		}

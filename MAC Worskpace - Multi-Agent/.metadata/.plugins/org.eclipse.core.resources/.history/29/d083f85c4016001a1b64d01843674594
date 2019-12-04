@@ -30,7 +30,7 @@ public class TickerAgent extends Agent{
 	private Ontology ontology = SupplyChainOntology.getInstance();
 	
 	private int dayCount = 0;
-	private int dayMAX = 100;
+	private int dayMAX = 3;
 	private ArrayList<AID> simulationAgents = new ArrayList<>();
 	
 	protected void setup(){

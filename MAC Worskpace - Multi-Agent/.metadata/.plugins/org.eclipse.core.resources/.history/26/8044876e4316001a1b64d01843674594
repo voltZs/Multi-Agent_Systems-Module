@@ -485,7 +485,7 @@ public class ManufacturerAgent extends Agent {
 			
 //			Remove number of shipped components from the warehouse
 			for(SellPhones shippedOrder : toBeShipped){
-				warehouse.ship(shippedOrder);
+				warehouse.ship(phoneOrder);
 				phoneOrdersMngr.shipOrder(shippedOrder);
 			}
 		}
