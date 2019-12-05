@@ -15,13 +15,13 @@ import mas.coursework_ontology.elements.SellPhones;
 public class SupplyChainSimulation {
 	
 	private static int numberOfNodes = 1; //this is the number of simulation configurations that will be created
-	private static int simulationReplicas = 1; //this is the number of times each simulation will run with one configuration so an average can be drawn
+	private static int simulationReplicas = 30; //this is the number of times each simulation will run with one configuration so an average can be drawn
 
 	private static int evaluatedAttr;
 	
 	private static int numOfCustomers = 3;
 	private static int warehouseCost = 5;
-	private static int penaltyRange = 50;
+	private static int penaltyRange = 250;
 
 	public static void main(String[] args) {
 		Profile myProfile = new ProfileImpl();
