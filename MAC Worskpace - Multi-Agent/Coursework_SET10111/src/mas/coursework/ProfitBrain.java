@@ -72,6 +72,17 @@ public class ProfitBrain {
 	public ArrayList<Double> getDailyProfits(){
 		return dailyProfits;
 	}
+	
+	/*
+	 * Return total accumulated profit so far
+	 */
+	public int getAccumulatedProfit() {
+		int totalProfit = 0;
+		for(Double num : dailyProfits){
+			totalProfit += num;
+		}
+		return totalProfit;
+	}
 
 	private Double totalValueOfOrdersShipped() {
 		Double sum = 0.0;
@@ -170,7 +181,11 @@ public class ProfitBrain {
 		return cheapestOption;
 	}
 	private ArrayList<BuyingOption> getComponentBuyingOptions(Component comp) {
-		return componentMarket.get(comp.getType()).get(comp.getIdentifier());
+		HashMap<String, ArrayList<BuyingOption>> compMarketByType = componentMarket.get(comp.getType());
+//		System.out.println(compMarketByType);
+		ArrayList<BuyingOption> compMarketByIdentif = compMarketByType.get(comp.getIdentifier());
+//		System.out.println(compMarketByIdentif);
+		return compMarketByIdentif;
 	}
 	
 	public String compMarketToString(){

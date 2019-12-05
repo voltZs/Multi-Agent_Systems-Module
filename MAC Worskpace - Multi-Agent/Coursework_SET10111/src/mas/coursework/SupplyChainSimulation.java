@@ -14,19 +14,16 @@ import mas.coursework_ontology.elements.Screen;
 import mas.coursework_ontology.elements.SellPhones;
 public class SupplyChainSimulation {
 	
-	private static int numberOfNodes = 1; //this is the number of simulation configurations that will be created
-	private static int simulationReplicas = 1; //this is the number of times each simulation will run with one configuration so an average can be drawn
+	private static int numberOfNodes = 25; //this is the number of simulation configurations that will be created
+	private static int simulationReplicas = 30; //this is the number of times each simulation will run with one configuration so an average can be drawn
+
+	private static int evaluatedAttr;
 	
-	private static int numOfCustomers = 3;
+	private static int numOfCustomers = 14;
 	private static int warehouseCost = 5;
 	private static int penaltyRange = 50;
-	
-	public static HashMap<Component, Integer> warehouse;
 
 	public static void main(String[] args) {
-		
-//		ArrayList<AgentController>
-		
 		Profile myProfile = new ProfileImpl();
 		Runtime myRuntime = Runtime.instance();
 		
@@ -38,17 +35,22 @@ public class SupplyChainSimulation {
 		} catch (StaleProxyException e1) {
 			e1.printStackTrace();
 		}
-
-		for(int i = 0; i< numberOfNodes; i++){
+		
+//		set bellow to 'customers' or 'wh_penalty' or 'order_penalty' based on what is evaluated
+//		SimulationLogger.appendHeader("customers");
+		for(int i = 5; i< numberOfNodes; i++){
+			evaluatedAttr = numOfCustomers;
 			createAgents(myContainer, 0);
-//			numOfCustomers ++;
+			numOfCustomers += 4;
 		}
 	}
 	
 	public static void createAgents(ContainerController myContainer, int run){
 		try{
-			Object[] agentArguments0 = new Object[1];
+			Object[] agentArguments0 = new Object[3];
 			agentArguments0[0] = warehouseCost;
+			agentArguments0[1] = evaluatedAttr;
+			agentArguments0[2] = run;	
 			AgentController manufacturerAgent = myContainer.createNewAgent("manufacturer-run"+run, ManufacturerAgent.class.getCanonicalName(), agentArguments0);
 			manufacturerAgent.start();
 			

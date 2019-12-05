@@ -52,12 +52,18 @@ public class ManufacturerAgent extends Agent {
 	private ProfitBrain profitBrain = new ProfitBrain();
 	private Warehouse warehouse;
 	private PhoneOrdersManager phoneOrdersMngr = new PhoneOrdersManager();
+	
+	private int evaluatedAttr;
+	private int run;
 
 	protected void setup() {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		Object[] args = this.getArguments();
 		warehouse = new Warehouse((int) args[0]);
+		evaluatedAttr = (int) args[1];
+		run = (int) args[2];
+		
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
@@ -142,9 +148,10 @@ public class ManufacturerAgent extends Agent {
 							dailyTasks.addSubBehaviour(new EndDay(myAgent));
 							myAgent.addBehaviour(dailyTasks);
 						} else {
-							// not a new day and done is true -> simulation must
+							// not a new day and terminate is true -> simulation must
 							// be over
 							System.out.println("Deleting agent: " + getAID().getLocalName());
+							SimulationLogger.appendLine(evaluatedAttr, run, profitBrain.getAccumulatedProfit());
 							try {
 								DFService.deregister(myAgent);
 							} catch (FIPAException e) {
@@ -191,8 +198,8 @@ public class ManufacturerAgent extends Agent {
 						if (action instanceof SellPhones) {
 							SellPhones order = (SellPhones) action;
 							phoneOrdersMngr.phoneOrderReceived(order);
-							System.out.println("Received phone order:");
-							System.out.println(phoneOrdersMngr.orderToString(order));
+							System.out.println("Received phone order");
+//							System.out.println(phoneOrdersMngr.orderToString(order));
 							orderCount++;
 						}
 					}
@@ -376,7 +383,7 @@ public class ManufacturerAgent extends Agent {
 			
 //			DECIDE WHAT TO ORDER
 			ArrayList<SellComponents> todaysOrders = profitBrain.componentsToOrder();
-			System.out.println("Submitted "+ todaysOrders.size() +" component orders");
+//			System.out.println("Submitted "+ todaysOrders.size() +" component orders");
 			
 			for(SellComponents order : todaysOrders){
 				AID supplier = order.getSeller();
@@ -477,14 +484,14 @@ public class ManufacturerAgent extends Agent {
 		public void action() {
 			
 			HashMap<SellPhones, Integer> toBeAssembled = profitBrain.levelsToAssemble();
-			System.out.println("Today assembling: ");
+//			System.out.println("Today assembling: ");
 			for(SellPhones phoneOrder : toBeAssembled.keySet()){
 				phoneOrdersMngr.assemble(phoneOrder, toBeAssembled.get(phoneOrder));
-				System.out.println("\tamount: "+ toBeAssembled.get(phoneOrder) + " for " + phoneOrder);
+//				System.out.println("\tamount: "+ toBeAssembled.get(phoneOrder) + " for " + phoneOrder);
 			}
 			
 			ArrayList<SellPhones> toBeShipped = profitBrain.ordersToShip();
-			System.out.println("Today shipping: " + toBeShipped.size() + " phone orders");
+//			System.out.println("Today shipping: " + toBeShipped.size() + " phone orders");
 			for(SellPhones shippedOrder : toBeShipped){
 				warehouse.ship(shippedOrder);
 				phoneOrdersMngr.shipOrder(shippedOrder);
@@ -500,16 +507,12 @@ public class ManufacturerAgent extends Agent {
 
 		@Override
 		public void action() {
-			System.out.println(warehouse.toString());
+//			System.out.println(warehouse.toString());
 			profitBrain.todaysProfit(warehouse, phoneOrdersMngr);
 			
 			ArrayList<Double> dailyProfits = profitBrain.getDailyProfits();
-			System.out.println(dailyProfits);
-			int totalProfit = 0;
-			for(Double num : dailyProfits){
-				totalProfit += num;
-			}
-			System.out.println("Total profits so far: "+ totalProfit);
+//			System.out.println(dailyProfits);
+			System.out.println("Total profits so far: "+ profitBrain.getAccumulatedProfit());
 //			Increment values for the next day
 			warehouse.incrementNewDay();
 			phoneOrdersMngr.incrementNewDay();

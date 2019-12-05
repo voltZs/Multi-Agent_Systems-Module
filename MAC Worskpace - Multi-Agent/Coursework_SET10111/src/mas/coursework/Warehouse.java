@@ -82,7 +82,7 @@ public class Warehouse {
 		for (OrderPair pair : order.getOrderPairs()) {
 			Component comp = (Component) pair.getOrderedItem();
 			int amount = pair.getQuantity();
-			System.out.println("Adding " + amount + " of " + comp.getType() + ", " + comp.getIdentifier());
+//			System.out.println("Adding " + amount + " of " + comp.getType() + ", " + comp.getIdentifier());
 			for (int i = 0; i < amount; i++) {
 				expectedDeliveries.add(new ExpectedDelivery(comp, order.getDeliveryTime()));
 			}

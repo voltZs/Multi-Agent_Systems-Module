@@ -41,10 +41,8 @@ public class SupplierAgent extends Agent{
 		Object[] args = this.getArguments();
 		agentType = (int) args[0];
 		deliveryTime = (int) ((Math.pow(agentType,2))*(-1));
-		int wait = (int)(Math.random()*1000);
-		doWait(wait);
+		doWait(500*agentType);
 		catalogue = new SupplierCatalogue(agentType);
-		catalogue.printCalatogue();
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
