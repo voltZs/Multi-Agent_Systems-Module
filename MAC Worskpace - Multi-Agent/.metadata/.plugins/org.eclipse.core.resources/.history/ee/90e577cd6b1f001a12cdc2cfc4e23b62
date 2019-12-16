@@ -18,7 +18,6 @@ public class ProfitBrain {
 	private ArrayList<Double> dailyProfits;
 	private HashMap<String, HashMap<String, ArrayList<BuyingOption>>> componentMarket = new HashMap<>();
 	private Planner planner;
-	private int chucked = 0;
 	
 	public ProfitBrain(){
 		dailyProfits = new ArrayList<>();
@@ -241,12 +240,12 @@ public class ProfitBrain {
 		 * returns list of SellPhones phone orders to accept in order to execute this plan
 		 */
 		public ArrayList<SellPhones> updatePlan(PhoneOrdersManager phoneOrdersMngr, Warehouse warehouse) {
-			ArrayList<SellPhones> receivedOrders = filterUnprofitable(phoneOrdersMngr.getNewOrders());
-			orderByIdealProfit(receivedOrders);
+			ArrayList<SellPhones> newPhoneOrders = phoneOrdersMngr.getNewOrders();
+			orderByIdealProfit(newPhoneOrders);
 			
 			ArrayList<SellPhones> accepted = new ArrayList<>();	
 //			try to fit order in schedule, if possibble, accept
-			for(SellPhones order : receivedOrders){
+			for(SellPhones order : newPhoneOrders){
 				
 				ArrayList<ScheduleOption> scheduleOptions = generateScheduleOptions(phoneOrdersMngr, warehouse, order);
 				if(scheduleOptions.size() == 0){
@@ -334,10 +333,8 @@ public class ProfitBrain {
 			int amountToGo = order.getQuantity();
 			for (int i = dayToShip - daysForAssembly; i< dayToShip; i++){
 				int freeSpaces = 50;
-				if(phoneAssemblySchedule.size() > i){
-					for(SellPhones item : phoneAssemblySchedule.get(i).keySet()){
-						freeSpaces -= phoneAssemblySchedule.get(i).get(item);
-					}
+				for(SellPhones item : phoneAssemblySchedule.get(i).keySet()){
+					freeSpaces -= phoneAssemblySchedule.get(i).get(item);
 				}
 				if(freeSpaces < 0){
 					System.out.println("SOMETHING IS SERIIOUSLY WRONG HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -356,19 +353,6 @@ public class ProfitBrain {
 				Integer idealProfit2 = (sp2.getUnitPrice()*sp2.getQuantity()) - estimateAssemblyPrice(sp2);
 				return idealProfit1.compareTo(idealProfit2) * -1;
 			});
-		}
-		
-		private ArrayList<SellPhones> filterUnprofitable(ArrayList<SellPhones> orders){
-			ArrayList<SellPhones> filtered = new ArrayList<>();
-			for(SellPhones order : orders){
-				if( (order.getUnitPrice()*order.getQuantity()) - estimateAssemblyPrice(order) > 0 ){
-					filtered.add(order);
-				} else {
-					System.out.println("Chucking profit loss to BIN!!!");
-					chucked ++;
-				}
-			}
-			return filtered;
 		}
 		
 		private int estimateAssemblyPrice(SellPhones order) {
@@ -402,13 +386,11 @@ public class ProfitBrain {
 				//check if enough spaces to assemble by that day; if not continue > 
 				int sum = 0;
 				for(int j = today; j<i; j++){
-					if(phoneAssemblySchedule.size() > j){
-						for(SellPhones item : phoneAssemblySchedule.get(j).keySet()){
-							sum+= phoneAssemblySchedule.get(j).get(item);
-							if(sum > 50){
-								validOption = false;
-								break;
-							}
+					for(SellPhones item : phoneAssemblySchedule.get(j).keySet()){
+						sum+= phoneAssemblySchedule.get(j).get(item);
+						if(sum > 50){
+							validOption = false;
+							break;
 						}
 					}
 					if(!validOption){
@@ -459,9 +441,6 @@ public class ProfitBrain {
 		}
 		
 		public HashMap<SellPhones, Integer> whatToAssemble() {
-			if(phoneAssemblySchedule.size() < today+1){
-				return new HashMap();
-			}
 			return phoneAssemblySchedule.get(today);
 		}
 		

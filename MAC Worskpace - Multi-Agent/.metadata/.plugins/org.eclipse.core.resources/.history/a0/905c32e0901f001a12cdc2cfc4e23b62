@@ -334,10 +334,8 @@ public class ProfitBrain {
 			int amountToGo = order.getQuantity();
 			for (int i = dayToShip - daysForAssembly; i< dayToShip; i++){
 				int freeSpaces = 50;
-				if(phoneAssemblySchedule.size() > i){
-					for(SellPhones item : phoneAssemblySchedule.get(i).keySet()){
-						freeSpaces -= phoneAssemblySchedule.get(i).get(item);
-					}
+				for(SellPhones item : phoneAssemblySchedule.get(i).keySet()){
+					freeSpaces -= phoneAssemblySchedule.get(i).get(item);
 				}
 				if(freeSpaces < 0){
 					System.out.println("SOMETHING IS SERIIOUSLY WRONG HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

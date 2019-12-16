@@ -334,10 +334,8 @@ public class ProfitBrain {
 			int amountToGo = order.getQuantity();
 			for (int i = dayToShip - daysForAssembly; i< dayToShip; i++){
 				int freeSpaces = 50;
-				if(phoneAssemblySchedule.size() > i){
-					for(SellPhones item : phoneAssemblySchedule.get(i).keySet()){
-						freeSpaces -= phoneAssemblySchedule.get(i).get(item);
-					}
+				for(SellPhones item : phoneAssemblySchedule.get(i).keySet()){
+					freeSpaces -= phoneAssemblySchedule.get(i).get(item);
 				}
 				if(freeSpaces < 0){
 					System.out.println("SOMETHING IS SERIIOUSLY WRONG HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -402,13 +400,11 @@ public class ProfitBrain {
 				//check if enough spaces to assemble by that day; if not continue > 
 				int sum = 0;
 				for(int j = today; j<i; j++){
-					if(phoneAssemblySchedule.size() > j){
-						for(SellPhones item : phoneAssemblySchedule.get(j).keySet()){
-							sum+= phoneAssemblySchedule.get(j).get(item);
-							if(sum > 50){
-								validOption = false;
-								break;
-							}
+					for(SellPhones item : phoneAssemblySchedule.get(j).keySet()){
+						sum+= phoneAssemblySchedule.get(j).get(item);
+						if(sum > 50){
+							validOption = false;
+							break;
 						}
 					}
 					if(!validOption){
@@ -459,9 +455,6 @@ public class ProfitBrain {
 		}
 		
 		public HashMap<SellPhones, Integer> whatToAssemble() {
-			if(phoneAssemblySchedule.size() < today+1){
-				return new HashMap();
-			}
 			return phoneAssemblySchedule.get(today);
 		}
 		

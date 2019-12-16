@@ -225,7 +225,7 @@ public class Warehouse {
 			public void removeFromAisle(Component comp, int quantity) {
 				amount -= quantity;
 				if(amount < 0){
-					for(int i = 0; i <100000; i++){
+					for(int i = 0; i <10 0000; i++){
 						System.out.println("OMY FUCKING GOD");
 					}
 				}

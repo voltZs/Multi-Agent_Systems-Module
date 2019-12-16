@@ -14,14 +14,14 @@ import mas.coursework_ontology.elements.Screen;
 import mas.coursework_ontology.elements.SellPhones;
 public class SupplyChainSimulation {
 	
-	private static int numberOfNodes = 1; //this is the number of simulation configurations that will be created
+	private static int numberOfNodes = 25; //this is the number of simulation configurations that will be created
 	private static int simulationReplicas = 30; //this is the number of times each simulation will run with one configuration so an average can be drawn
 
 	private static int evaluatedAttr;
 	
 	private static int numOfCustomers = 3;
-	private static int warehouseCost = 5;
-	private static int penaltyRange = 250;
+	private static int warehouseCost = 0;
+	private static int penaltyRange = 50;
 
 	public static void main(String[] args) {
 		Profile myProfile = new ProfileImpl();
@@ -37,11 +37,11 @@ public class SupplyChainSimulation {
 		}
 		
 //		set bellow to 'customers' or 'warehouse_cost' or 'order_penalty' based on what is evaluated
-//		SimulationLogger.appendHeader("order_penalty");
+		SimulationLogger.appendHeader("warehouse_cost");
 		for(int i = 0; i< numberOfNodes; i++){
-			evaluatedAttr = penaltyRange;
+			evaluatedAttr = warehouseCost;
 			createAgents(myContainer, 0);
-			penaltyRange += 10;
+			warehouseCost += 5;
 		}
 	}
 	

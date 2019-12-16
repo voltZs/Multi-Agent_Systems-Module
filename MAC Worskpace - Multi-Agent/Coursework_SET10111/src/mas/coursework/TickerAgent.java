@@ -40,6 +40,7 @@ public class TickerAgent extends Agent{
 		
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(getAID());
+		System.out.println(getAID());
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType("ticker-agent");
 		sd.setName(getLocalName() + "-ticker-agent");
